@@ -161,4 +161,8 @@ def install_googletrans():
         subprocess.check_call(['pip', 'install', 'googletrans==4.0.0rc1'])
         print("googletrans installed successfully!")
     except Exception as e:
+<<<<<<< HEAD
         print(f"Failed to install googletrans: {e}")
+=======
+        print(f"Failed to install googletrans: {e}")
+>>>>>>> af1b65cc826cd7b02218304486a0559cf2cc8d1a

@@ -1,97 +1,720 @@
-<!-- Webcam Section -->
-<div class="webcam-container">
-  <!-- Camera Controls -->
-  <div class="camera-controls">
-    <div class="control-buttons">
-      <button id="startCameraBtn" class="btn btn-primary">
-        <i class="bi bi-camera-video"></i> Start Camera
-      </button>
-      <button id="stopCameraBtn" class="btn btn-outline-secondary d-none">
-        <i class="bi bi-camera-video-off"></i> Stop Camera
-      </button>
-      <button id="captureBtn" class="btn btn-success d-none">
-        <i class="bi bi-camera"></i> Capture & Analyze
-      </button>
-    </div>
-    <div class="camera-status">
-      <span id="cameraStatus" class="status-text">Camera Ready</span>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionLingo - See. Detect. Learn.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-fluid {
+            padding: 20px;
+        }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+        }
+        
+        #video-feed {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 15px;
+        }
+        
+        .camera-controls {
+    background: rgba(248, 249, 250, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
 
-  <!-- Camera Preview -->
-  <div class="camera-preview">
-    <div class="video-container">
-      <video id="webcamVideo" autoplay playsinline muted></video>
-      <canvas id="captureCanvas" class="d-none"></canvas>
-    </div>
-    <div class="preview-overlay">
-      <div class="scan-frame"></div>
-      <p class="scan-instruction">Point your camera at objects to discover vocabulary</p>
-    </div>
-  </div>
+.camera-controls h5 {
+    margin-bottom: 15px;
+    color: #495057;
+    font-weight: 600;
+}
 
-  <!-- Analysis Results -->
-  <div class="analysis-results d-none" id="analysisResults">
-    <div class="results-header">
-      <h4><i class="bi bi-lightbulb"></i> Vocabulary Discovered</h4>
-      <button id="clearResultsBtn" class="btn btn-outline-danger btn-sm">
-        <i class="bi bi-trash"></i> Clear
-      </button>
-    </div>
-    <div class="vocabulary-grid" id="vocabularyGrid">
-      <!-- Discovered vocabulary will be displayed here -->
-    </div>
-  </div>
+.btn-camera {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    margin: 0 5px 10px 5px; /* Add margin for spacing */
+}
 
-  <!-- Learning Statistics -->
-  <div class="webcam-stats">
-    <div class="stat-item">
-      <div class="stat-number" id="totalDiscovered">0</div>
-      <div class="stat-label">Words Discovered</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" id="todayDiscovered">0</div>
-      <div class="stat-label">Today's Discoveries</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number" id="savedWords">0</div>
-      <div class="stat-label">Saved to Vocabulary</div>
-    </div>
-  </div>
+.btn-laptop {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+}
 
-  <!-- Recent Discoveries -->
-  <div class="recent-discoveries">
-    <h5>Recent Discoveries</h5>
-    <div class="discoveries-list" id="discoveriesList">
-      <p class="empty-state">No discoveries yet. Start using your camera to find new vocabulary!</p>
-    </div>
-  </div>
+.btn-laptop:hover {
+    background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+}
 
-  <!-- Instructions -->
-  <div class="webcam-instructions">
-    <h5><i class="bi bi-info-circle"></i> How to Use</h5>
-    <div class="instruction-steps">
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <strong>Start Camera</strong>
-          <p>Click "Start Camera" to activate your webcam</p>
+.btn-phone {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+}
+
+.btn-phone:hover {
+    background: linear-gradient(45deg, #44a08d, #4ecdc4);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(68, 160, 141, 0.4);
+}
+
+.btn-photo {
+    background: linear-gradient(45deg, #fdcb6e, #e17055);
+    color: white;
+}
+
+.btn-photo:hover {
+    background: linear-gradient(45deg, #e17055, #fdcb6e);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(225, 112, 85, 0.4);
+}
+
+.phone-config {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.phone-config h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.status-indicator {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 25px;
+    padding: 8px 15px;
+    font-weight: 600;
+    border: 2px solid #e9ecef;
+    text-align: center;
+}
+
+/* Add responsive spacing */
+@media (max-width: 768px) {
+    .btn-camera {
+        padding: 8px 16px;
+        font-size: 14px;
+        margin: 2px;
+    }
+    
+    .camera-controls {
+        padding: 15px;
+    }
+}
+
+        
+        .detection-panel {
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .detection-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .detection-item:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+        }
+        
+        .detection-item.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .learning-content {
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .word-display {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .related-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .word-tag {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .sentence-example {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+            color: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        .title-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .title-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .phone-config {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            color: #667eea;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 10px;
+            }
+            
+            .main-card {
+                padding: 20px;
+                margin: 10px 0;
+            }
+            
+            .title-section h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-camera {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Accessibility improvements */
+        .btn:focus {
+            outline: 3px solid rgba(102, 126, 234, 0.5);
+            outline-offset: 2px;
+        }
+        
+        .detection-item:focus {
+            outline: 3px solid rgba(0, 123, 255, 0.5);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Section -->
+    <div class="title-section">
+        <div class="container">
+            <h1><i class="fas fa-eye"></i> VisionLingo</h1>
+            <p class="lead">See. Detect. Learn. - Interactive Visual Language Learning</p>
         </div>
-      </div>
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <strong>Point & Capture</strong>
-          <p>Point your camera at objects around you and click "Capture & Analyze"</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <strong>Learn Vocabulary</strong>
-          <p>Discover new words and their translations, then save them to your vocabulary list</p>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Main Container -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Column - Video and Controls -->
+            <div class="col-lg-6">
+                <div class="main-card">
+                    <h3 class="text-center mb-4">
+                        <i class="fas fa-camera"></i> Camera View
+                    </h3>
+                    
+                    <!-- Video Container -->
+                    <div class="video-container">
+                        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+                    </div>
+                    
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <!-- ✅ 1st Row: Camera Controls Header -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5><i class="fas fa-cog"></i> Camera Controls</h5>
+                            </div>
+                        </div>
+                        
+                        <!-- ✅ 2nd Row: Camera Type Buttons -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <button class="btn btn-camera btn-laptop" onclick="switchCamera('laptop')">
+                                        <i class="fas fa-laptop"></i> Laptop Camera
+                                    </button>
+                                    <button class="btn btn-camera btn-phone" onclick="switchCamera('phone')">
+                                        <i class="fas fa-mobile-alt"></i> Phone Camera
+                                    </button>
+                                    <label for="photo-upload" class="btn btn-camera btn-photo">
+                                        <i class="fas fa-upload"></i> Upload Photo
+                                    </label>
+                                    <input type="file" id="photo-upload" accept="image/*" style="display: none;" onchange="uploadPhoto(this)">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ✅ 3rd Row: Phone Configuration (below buttons) -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="phone-config" id="phone-config" style="display: none;">
+                                    <h6><i class="fas fa-network-wired"></i> Phone Camera Configuration</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="phone-ip">Phone IP:</label>
+                                            <input type="text" id="phone-ip" class="form-control" value="192.168.0.180" placeholder="192.168.x.x">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="phone-port">Port:</label>
+                                            <input type="text" id="phone-port" class="form-control" value="8080" placeholder="8080">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-success mt-2" onclick="connectPhone()">
+                                        <i class="fas fa-link"></i> Connect
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Camera Status Display -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="status-indicator" id="camera-status">
+                                    <i class="fas fa-circle text-success"></i> Camera Status: Loading...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Detections and Learning -->
+            <div class="col-lg-6">
+                <div class="main-card">
+                    <h3 class="text-center mb-4">
+                        <i class="fas fa-search"></i> Object Detection & Learning
+                    </h3>
+                    
+                    <!-- Detection Panel -->
+                    <div class="detection-panel">
+                        <h5><i class="fas fa-bullseye"></i> Detected Objects</h5>
+                        <p class="text-muted">Click on any object below to learn more about it:</p>
+                        <div id="detections-list">
+                            <div class="loading-spinner">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading detections...</span>
+                                </div>
+                                <p>Detecting objects in view...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Learning Content Panel -->
+                    <div class="learning-content" id="learning-content" style="display: none;">
+                        <div class="word-display" id="word-display">
+                            <h4 id="selected-word">Select an object to learn</h4>
+                            <p id="selected-translation"></p>
+                        </div>
+                        
+                        <div id="related-content">
+                            <!-- Related words and sentences will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDetections = [];
+        let selectedObjectIndex = null;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDetections();
+            updateCameraStatus();
+            
+            // Set up periodic updates
+            setInterval(updateDetections, 2000);
+            setInterval(updateCameraStatus, 5000);
+        });
+
+        // Update camera status
+        function updateCameraStatus() {
+            fetch('/get_detections')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('camera-status').innerHTML = 
+                        `<i class="fas fa-circle text-success"></i> ${data.camera_status}`;
+                })
+                .catch(error => {
+                    console.error('Error updating camera status:', error);
+                    document.getElementById('camera-status').innerHTML = 
+                        `<i class="fas fa-circle text-danger"></i> Status: Error`;
+                });
+        }
+
+        // Update detections list
+        function updateDetections() {
+            fetch('/get_detections')
+                .then(response => response.json())
+                .then(data => {
+                    currentDetections = data.detections;
+                    displayDetections(currentDetections);
+                })
+                .catch(error => {
+                    console.error('Error fetching detections:', error);
+                    document.getElementById('detections-list').innerHTML = 
+                        '<div class="alert alert-danger">Error loading detections</div>';
+                });
+        }
+
+        // Display detections in the UI
+        function displayDetections(detections) {
+            const container = document.getElementById('detections-list');
+            
+            if (detections.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-search fa-2x mb-3"></i>
+                        <p>No objects detected yet.<br>Point the camera at objects to start learning!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            detections.forEach((detection, index) => {
+                const isSelected = index === selectedObjectIndex;
+                const confidence = (detection.confidence * 100).toFixed(1);
+                
+                html += `
+                    <div class="detection-item ${isSelected ? 'selected' : ''}" 
+                        onclick="selectObject(${index}, '${detection.en}', '${detection.cn}')"
+                        tabindex="0"
+                        onkeypress="if(event.key==='Enter') selectObject(${index}, '${detection.en}', '${detection.cn}')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${detection.en}</h6>
+                                <small class="text-muted">${detection.cn}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary">${confidence}%</span>
+                                ${isSelected ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Select an object for learning
+        function selectObject(index, englishName, chineseName) {
+            selectedObjectIndex = index;
+            
+            // Update UI to show selected object
+            displayDetections(currentDetections);
+            
+            // ✅ CALL /log_selection TO GET N8N DATA
+            fetch('/log_selection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    en: englishName,
+                    cn: chineseName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('✅ Learning content received:', data);
+                    displayLearningContent(englishName, chineseName, data);
+                } else {
+                    console.error('❌ Failed to get learning content:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error fetching learning content:', error);
+            });
+          }
+
+          // ✅ ADD: Function to display learning content from n8n
+          function displayLearningContent(englishName, chineseName, data) {
+              console.log('🔍 displayLearningContent called with:', data);
+              
+              const contentPanel = document.getElementById('learning-content');
+              const wordDisplay = document.getElementById('word-display');
+              const relatedContent = document.getElementById('related-content');
+              
+              // Update word display
+              document.getElementById('selected-word').textContent = englishName;
+              document.getElementById('selected-translation').textContent = chineseName;
+              
+              // Build related content HTML
+              let relatedHTML = '';
+              
+              // ✅ FIX: Handle your n8n format for related_items
+              if (data.related_items && Array.isArray(data.related_items) && data.related_items.length > 0) {
+                  relatedHTML += `
+                      <div class="mb-4">
+                          <h5><i class="fas fa-tags"></i> Related Words</h5>
+                          <div class="related-words">
+                  `;
+                  
+                  data.related_items.forEach(item => {
+                      console.log('🔍 Processing related item:', item);
+                      
+                      // Your n8n returns: {"cn": "袜子", "en": "socks"}
+                      if (item && typeof item === 'object' && item.en && item.cn) {
+                          relatedHTML += `<span class="word-tag" title="${item.cn}">${item.en} ${item.cn}</span>`;
+                      } else if (typeof item === 'string') {
+                          relatedHTML += `<span class="word-tag">${item}</span>`;
+                      }
+                  });
+                  
+                  relatedHTML += '</div></div>';
+              } else {
+                  console.log('❌ No valid related_items found:', data.related_items);
+              }
+              
+              // ✅ FIX: Handle your n8n format for example_sentences
+              if (data.example_sentences && Array.isArray(data.example_sentences) && data.example_sentences.length > 0) {
+                  relatedHTML += `
+                      <div class="mb-4">
+                          <h5><i class="fas fa-quote-left"></i> Example Sentences</h5>
+                  `;
+                  
+                  data.example_sentences.forEach(sentence => {
+                      console.log('🔍 Processing sentence:', sentence);
+                      
+                      // Your n8n returns: {"cn": "我需要买一双新的鞋子。", "en": "I need to buy a new pair of shoes."}
+                      if (sentence && typeof sentence === 'object' && sentence.en && sentence.cn) {
+                          relatedHTML += `
+                              <div class="sentence-example">
+                                  <div class="fw-bold">${sentence.en}</div>
+                                  <div class="text-muted">${sentence.cn}</div>
+                              </div>
+                          `;
+                      } else if (Array.isArray(sentence) && sentence.length >= 2) {
+                          // Fallback for array format
+                          relatedHTML += `
+                              <div class="sentence-example">
+                                  <div class="fw-bold">${sentence[0]}</div>
+                                  <div class="text-muted">${sentence[1]}</div>
+                              </div>
+                          `;
+                      }
+                  });
+                  
+                  relatedHTML += '</div>';
+              } else {
+                  console.log('❌ No valid example_sentences found:', data.example_sentences);
+              }
+              
+              // Show learning content
+              if (relatedHTML.trim()) {
+                  relatedContent.innerHTML = relatedHTML;
+                  contentPanel.style.display = 'block';
+                  contentPanel.classList.add('fade-in');
+                  console.log('✅ Learning content displayed successfully');
+              } else {
+                  relatedContent.innerHTML = '<p class="text-muted"><i class="fas fa-info-circle"></i> No learning content available from n8n.</p>';
+                  contentPanel.style.display = 'block';
+                  console.log('⚠️ No learning content to display');
+              }
+          }
+                  
+        // Switch camera type
+        function switchCamera(type) {
+            if (type === 'phone') {
+                document.getElementById('phone-config').style.display = 'block';
+                return;
+            }
+            
+            const payload = {type: type};
+            
+            fetch('/switch_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCameraStatus();
+                    // Hide phone config if switching away from phone
+                    if (type !== 'phone') {
+                        document.getElementById('phone-config').style.display = 'none';
+                    }
+                } else {
+                    alert('Failed to switch camera: ' + data.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error switching camera:', error);
+                alert('Error switching camera');
+            });
+        }
+
+        // Connect to phone camera
+        function connectPhone() {
+            const ip = document.getElementById('phone-ip').value;
+            const port = document.getElementById('phone-port').value;
+            
+            fetch('/switch_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'phone',
+                    ip: ip,
+                    port: port
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCameraStatus();
+                    document.getElementById('phone-config').style.display = 'none';
+                } else {
+                    alert('Failed to connect to phone camera: ' + data.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error connecting to phone:', error);
+                alert('Error connecting to phone camera');
+            });
+        }
+
+        // Upload photo
+        function uploadPhoto(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('photo', input.files[0]);
+                
+                fetch('/upload_photo', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCameraStatus();
+                        alert('Photo uploaded successfully!');
+                    } else {
+                        alert('Failed to upload photo: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading photo:', error);
+                    alert('Error uploading photo');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
 import os
 import re
 import boto3
@@ -12,6 +12,19 @@ import json
 import tempfile
 import time
 from decimal import Decimal
+
+# ===== VisionLingo =====
+import cv2
+import numpy as np
+import threading
+import warnings
+from utils.aws_rekognition_infer import AWSRekognitionDetector
+from utils.overlay import draw_dots_and_labels
+from translate import translate_text
+
+# Suppress OpenCV warnings
+os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
+warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-me"
@@ -43,6 +56,230 @@ chatbot_logs_table = dynamodb.Table(CHATBOT_LOGS_TABLE)
 
 # Simple in-memory storage for learning check-ins (in production, use database)
 learning_checkins = {}  # {user_id: [{'date': 'YYYY-MM-DD', 'timestamp': '...'}]}
+
+# ===== VisionLingo =====
+class CameraManager:
+    def __init__(self):
+        self.current_camera = None
+        self.camera_type = None  # 'laptop', 'phone', or 'photo'
+        self.phone_ip = "192.168.0.180"  # Updated IP
+        self.phone_port = "8080"
+        self.camera_lock = threading.Lock()
+        self.uploaded_frame = None  # Store uploaded photo frame
+        
+    def get_phone_url(self):
+        return f"http://{self.phone_ip}:{self.phone_port}/video"
+    
+    def test_camera(self, camera_source, camera_type):
+        try:
+            test_cap = cv2.VideoCapture(camera_source)
+            if test_cap.isOpened():
+                ret, frame = test_cap.read()
+                test_cap.release()
+                if ret and frame is not None:
+                    print(f"✅ {camera_type} camera test successful")
+                    return True
+            test_cap.release()
+            print(f"❌ {camera_type} camera test failed")
+            return False
+        except Exception as e:
+            print(f"❌ {camera_type} camera error: {e}")
+            return False
+    
+    def switch_to_laptop(self):
+        with self.camera_lock:
+            if self.current_camera:
+                self.current_camera.release()
+            
+            for i in range(3):
+                if self.test_camera(i, f"Laptop Camera {i}"):
+                    self.current_camera = cv2.VideoCapture(i)
+                    self.camera_type = 'laptop'
+                    self.uploaded_frame = None
+                    print(f"🎥 Switched to Laptop Camera {i}")
+                    return True
+            
+            print("❌ No laptop camera available")
+            return False
+    
+    def switch_to_phone(self, ip=None, port=None):
+        if ip:
+            self.phone_ip = ip
+        if port:
+            self.phone_port = port
+        
+        phone_url = self.get_phone_url()
+        
+        with self.camera_lock:
+            if self.current_camera:
+                self.current_camera.release()
+            
+            if self.test_camera(phone_url, "Phone Camera"):
+                self.current_camera = cv2.VideoCapture(phone_url)
+                self.camera_type = 'phone'
+                self.uploaded_frame = None
+                print(f"📱 Switched to Phone Camera: {phone_url}")
+                return True
+            else:
+                print(f"❌ Phone camera not available at {phone_url}")
+                self.switch_to_laptop()
+                return False
+    
+    def switch_to_photo(self, photo_frame):
+        """Switch to uploaded photo mode"""
+        with self.camera_lock:
+            if self.current_camera:
+                self.current_camera.release()
+                self.current_camera = None
+            
+            self.uploaded_frame = cv2.resize(photo_frame, (640, 480))
+            self.camera_type = 'photo'
+            print("🖼️ Switched to uploaded photo")
+            return True
+    
+    def read_frame(self):
+        with self.camera_lock:
+            if self.camera_type == 'photo' and self.uploaded_frame is not None:
+                return True, self.uploaded_frame.copy()
+            elif self.current_camera and self.current_camera.isOpened():
+                ret, frame = self.current_camera.read()
+                if ret:
+                    return True, frame
+        return False, None
+    
+    def get_status(self):
+        if self.camera_type == 'photo':
+            return "🖼️ Uploaded Photo ✅"
+        elif self.current_camera and self.current_camera.isOpened():
+            return f"{self.camera_type.title()} Camera ✅"
+        return "No Camera ❌"
+
+# Initialize camera manager
+camera_manager = CameraManager()
+camera_manager.switch_to_laptop()
+
+# Selection state
+selected_object_idx = None
+current_detections = []
+
+# Initialize AWS Rekognition detector
+detector = AWSRekognitionDetector()
+
+# Initialize camera manager
+camera_manager = CameraManager()
+camera_manager.switch_to_laptop()
+
+# Selection state for object detection
+selected_object_idx = None
+current_detections = []
+
+def gen_frames():
+    """Generate frames with object detection using HARDCODED translations"""
+    global selected_object_idx, current_detections
+    while True:
+        success, frame = camera_manager.read_frame()
+        if not success or frame is None:
+            # Handle error frames
+            error_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(error_frame, "Camera Error - Check Connection", 
+                       (120, 220), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+            ret, buffer = cv2.imencode('.jpg', error_frame)
+            frame_bytes = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+            time.sleep(0.1)
+            continue
+
+        try:
+            frame = cv2.resize(frame, (640, 480))
+            # Get raw detections from AWS Rekognition
+            raw_detections = detector.infer(frame)
+            
+            # ✅ Transform detections with HARDCODED translations
+            current_detections = []
+            for detection in raw_detections:
+                # Extract from AWS detector format
+                label = detection.get('label', 'Unknown')
+                confidence = detection.get('conf', 0.0)
+                
+                # Format object names properly
+                english_name = label.replace('_', ' ').title()
+                
+                # ✅ USE HARDCODED TRANSLATIONS from ZH_CN_MAP
+                chinese_name = get_hardcoded_translation(english_name)
+                
+                print(f"🔍 Hardcoded Translation: {english_name} → {chinese_name}")
+                
+                # Create detection in expected format
+                formatted_detection = {
+                    'en': english_name,      # English name  
+                    'cn': chinese_name,      # Hardcoded Chinese translation
+                    'confidence': confidence # 0-1 format
+                }
+                current_detections.append(formatted_detection)
+            
+            # Draw overlay with raw detections
+            frame = draw_dots_and_labels(
+                frame, raw_detections,
+                selected_idx=selected_object_idx,
+                show_confidence=False
+            )
+
+            # Add camera status overlay
+            camera_info = f"{camera_manager.camera_type.upper()} CAM" if camera_manager.camera_type else "NO CAM"
+            color = (255, 0, 0) if camera_manager.camera_type == 'laptop' else \
+                    (0, 255, 0) if camera_manager.camera_type == 'phone' else \
+                    (0, 165, 255) if camera_manager.camera_type == 'photo' else (255, 255, 255)
+                    
+            cv2.putText(frame, camera_info, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(frame, camera_info, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 1)
+
+        except Exception as e:
+            print(f"❌ Detection error: {e}")
+            current_detections = []
+
+        ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        frame_bytes = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+        time.sleep(0.033)  # ~30 FPS
+
+
+def get_hardcoded_translation(english_text):
+    """Get hardcoded translation from ZH_CN_MAP in translate.py"""
+    from translate import ZH_CN_MAP
+    
+    # Try exact match first
+    if english_text.lower() in ZH_CN_MAP:
+        return ZH_CN_MAP[english_text.lower()]
+    
+    # Try common AWS Rekognition labels
+    aws_to_common = {
+        'Adult': 'person',
+        'Female': 'female', 
+        'Woman': 'female',
+        'Man': 'person',
+        'Male': 'person',
+        'Human': 'person',
+        'Face': 'face',
+        'Head': 'head',
+        'Selfie': 'person',  # Fallback to person
+        'Portrait': 'person', # Fallback to person
+        'Photography': 'person',
+        'Smile': 'smile',
+        'Machine': 'laptop',  # Fallback to laptop
+        'Electronics': 'laptop',
+        'Device': 'laptop'
+    }
+    
+    # Map AWS labels to common dictionary terms
+    common_term = aws_to_common.get(english_text, english_text.lower())
+    
+    # Look up in ZH_CN_MAP
+    translation = ZH_CN_MAP.get(common_term, english_text)
+    
+    return translation
+
 
 # ===== S3 和 DynamoDB 辅助函数 =====
 
@@ -604,6 +841,33 @@ def get_chat_history_from_dynamodb(users_id, limit=20, last_chatbot_logs_id=None
     except Exception as e:
         print(f"❌ 获取聊天历史失败: {str(e)}")
         return {'messages': [], 'has_more': False, 'last_chatbot_logs_id': None}
+    
+def translate_text(text, target_language='Chinese', source_language='English'):
+    """Simple translation fallback function"""
+    translations = {
+        'Person': '人', 'people': '人们', 'man': '男人', 'woman': '女人',
+        'Cup': '杯子', 'mug': '马克杯', 'glass': '玻璃杯',
+        'Bottle': '瓶子', 'water bottle': '水瓶',
+        'Chair': '椅子', 'seat': '座位',
+        'Book': '书', 'notebook': '笔记本',
+        'Cell Phone': '手机', 'Mobile Phone': '手机', 'smartphone': '智能手机',
+        'Laptop': '笔记本电脑', 'Computer': '电脑',
+        'Car': '汽车', 'vehicle': '车辆',
+        'Clock': '钟表', 'watch': '手表',
+        'Dog': '狗', 'puppy': '小狗',
+        'Cat': '猫', 'kitten': '小猫',
+        'Table': '桌子', 'desk': '书桌',
+        'Bed': '床',
+        'Door': '门',
+        'Window': '窗户',
+        'Mouse': '鼠标',
+        'Keyboard': '键盘',
+        'Monitor': '显示器',
+        'Bag': '包',
+        'Shoe': '鞋',
+        'Glasses': '眼镜'
+    }
+    return translations.get(text, text)  # Return original if no translation found
 
 @app.route("/")
 def home():
@@ -1717,7 +1981,172 @@ def update_user_preferences():
             'success': False,
             'error': error_msg
         }), 500
+    
+@app.route('/visionlingo')
+def visionlingo():
+    return render_template('visionlingo.html')
 
+@app.route('/video_feed')
+def video_feed():
+    """Stream video with object detection overlay"""
+    return Response(gen_frames(), 
+                   mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/select_object', methods=['POST'])
+def select_object():
+    global selected_object_idx
+    data = request.get_json()
+    selected_object_idx = data.get('index')
+    return jsonify({'success': True})
+
+@app.route('/switch_camera', methods=['POST'])
+def switch_camera():
+    data = request.get_json()
+    camera_type = data.get('type')
+    
+    if camera_type == 'laptop':
+        success = camera_manager.switch_to_laptop()
+    elif camera_type == 'phone':
+        success = camera_manager.switch_to_phone()
+    
+    return jsonify({'success': success, 'status': camera_manager.get_status()})
+
+@app.route('/upload_photo', methods=['POST'])
+def upload_photo():
+    """Handle photo upload and switch to photo mode"""
+    try:
+        if 'photo' not in request.files:
+            return jsonify({'success': False, 'error': 'No photo uploaded'})
+        
+        file = request.files['photo']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No photo selected'})
+        
+        # Read image directly from upload
+        image_data = file.read()
+        nparr = np.frombuffer(image_data, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if frame is None:
+            return jsonify({'success': False, 'error': 'Invalid image format'})
+        
+        # Switch camera manager to photo mode
+        camera_manager.switch_to_photo(frame)
+        
+        # Save uploaded file (optional)
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save original file
+        with open(filepath, 'wb') as f:
+            f.write(image_data)
+        
+        print(f"🖼️ Photo uploaded: {filename}")
+        return jsonify({'success': True, 'filename': filename})
+        
+    except Exception as e:
+        print(f"❌ Photo upload error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+    
+@app.route('/log_selection', methods=['POST'])
+def log_selection():
+    """Log selected object and get learning content from n8n webhook"""
+    try:
+        data = request.get_json()
+        english_name = data.get('en', '')
+        chinese_name = data.get('cn', '')
+        
+        if not english_name or not chinese_name:
+            return jsonify({
+                'status': 'error', 
+                'message': 'Missing English or Chinese name'
+            })
+        
+        # Create selection data
+        selection_data = {
+            "cn": chinese_name,
+            "en": english_name
+        }
+        
+        # Send to n8n webhook for learning content
+        webhook_url = "https://n8n.smart87.me/webhook/related-item"
+        try:
+            response = requests.post(
+                webhook_url,
+                json=selection_data,
+                headers={'Content-Type': 'application/json'},
+                timeout=15
+            )
+            
+            print(f"🔍 n8n webhook status: {response.status_code}")
+            print(f"🔍 n8n webhook response: {response.text}")
+            
+            if response.status_code == 200:
+                webhook_data = response.json()
+                print(f"🔍 Parsed n8n data: {webhook_data}")
+                
+                # ✅ FIX: Handle your n8n response format - it's an array!
+                if isinstance(webhook_data, list) and len(webhook_data) > 0:
+                    response_data = webhook_data[0]  # Get first item from array
+                    
+                    return jsonify({
+                        'status': 'success',
+                        'data': selection_data,
+                        'related_items': response_data.get('related_items', []),
+                        'example_sentences': response_data.get('example_sentences', [])
+                    })
+                else:
+                    # Handle case where response is not an array or is empty
+                    return jsonify({
+                        'status': 'success',
+                        'data': selection_data,
+                        'related_items': [],
+                        'example_sentences': []
+                    })
+            else:
+                print(f"❌ n8n webhook failed with status: {response.status_code}")
+                return jsonify({
+                    'status': 'success',
+                    'data': selection_data,
+                    'related_items': [],
+                    'example_sentences': []
+                })
+                
+        except Exception as webhook_error:
+            print(f"❌ Webhook error: {webhook_error}")
+            return jsonify({
+                'status': 'success',
+                'data': selection_data,
+                'related_items': [],
+                'example_sentences': []
+            })
+        
+    except Exception as e:
+        print(f"❌ log_selection error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+    
+@app.route('/get_detections')
+def get_detections():
+    """Get current object detections"""
+    global current_detections
+    return jsonify({
+        'detections': current_detections,
+        'camera_status': camera_manager.get_status()
+    })
+
+@app.route('/clear_selection', methods=['POST'])
+def clear_selection():
+    global selected_object_idx
+    selected_object_idx = None
+    print("🔄 Selection cleared")
+    return jsonify({'status': 'cleared'})
+    
+@app.route('/webcam')
+def webcam_section():
+    """VisionLingo main page"""
+    if not session.get("user_id"):
+        return redirect(url_for("register_page"))
+    return render_template('partial/webcam_section.html')
 
 if __name__ == "__main__":
     print("🚀 启动 Flask 应用...")
