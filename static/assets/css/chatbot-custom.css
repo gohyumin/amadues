@@ -1,0 +1,39 @@
+/* 美化机器人语音和文本回复 */
+.bot-reply-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.bot-reply-bubble {
+  background: #f5f7ff;
+  border-radius: 12px;
+  padding: 16px 18px 12px 18px;
+  box-shadow: 0 2px 8px rgba(80,120,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 420px;
+}
+.bot-audio-bubble {
+  margin-bottom: 8px;
+  width: 100%;
+}
+.bot-reply-text {
+  font-size: 1.08em;
+  color: #2a2a2a;
+  margin-top: 2px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.avatar img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+@media (max-width: 600px) {
+  .bot-reply-bubble {
+    max-width: 98vw;
+    padding: 12px 8px 8px 8px;
+  }
+}
