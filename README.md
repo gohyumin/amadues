@@ -1,122 +1,236 @@
-<<<<<<< HEAD
-# Flask Web Application with DynamoDB
+# LinguaDaily - Powered Language Learning Platform
 
-This is a web application built using Flask (Python) and Amazon DynamoDB for the database.
+## 🚀 Project Overview
 
-## Project Structure
-```
-├── app.py                  # Main Flask application file
-├── static/                 # Static files directory
-│   ├── assets/            # Core assets
-│   │   ├── css/          # CSS files
-│   │   │   ├── auth.css  # Authentication styles
-│   │   │   └── main.css  # Main application styles
-│   │   ├── img/          # Image assets
-│   │   │   ├── about/    # About section images
-│   │   │   ├── features/ # Features section images
-│   │   │   ├── misc/     # Miscellaneous images
-│   │   │   ├── person/   # Person/Team member images
-│   │   │   └── services/ # Services section images
-│   │   ├── js/          # JavaScript files
-│   │   │   └── main.js  # Main JavaScript functionality
-│   │   ├── scss/        # SCSS source files
-│   │   └── vendor/      # Third-party libraries
-│   │       ├── aos/     # Animate On Scroll library
-│   │       ├── bootstrap/# Bootstrap framework files
-│   │       ├── bootstrap-icons/# Bootstrap icons
-│   │       ├── php-email-form/# PHP email form validator
-│   │       └── swiper/  # Swiper slider library
-│   ├── css/            # Additional CSS
-│   ├── forms/          # Form handling
-│   │   └── contact.php # Contact form processor
-│   ├── img/            # Additional images
-│   └── js/             # Additional JavaScript
-└── templates/          # Flask HTML templates
-    ├── index.html      # Main landing page
-    ├── register.html   # User registration page
-    ├── service-details.html # Service details page
-    └── starter-page.html   # Template starter page
-```
+LinguaDaily is a comprehensive language learning platform that combines computer vision, speech recognition, pronunciation assessment, and real-time translation to create an immersive learning experience. The system uses AWS services and Speech Cognitive Services to provide personalized language education through interactive object recognition and pronunciation feedback.
 
-## Prerequisites
+## ✨ Key Features
 
-Before running this application, make sure you have the following installed:
-- Python 3.x
-- pip (Python package installer)
-- AWS Account and configured credentials
+### 🎯 Core Functions
 
-## Installation
+#### **1. Real-Time Object Detection & Translation**
 
-1. Create and activate a virtual environment (recommended):
-```bash
-python -m venv venv
-.\venv\Scripts\activate  # For Windows
-```
+- **AWS Rekognition Integration**: Real-time object detection using computer vision
+- **Multi-Camera Support**: Laptop camera, phone camera (IP webcam), and photo upload modes
+- **Hardcoded Translation Dictionary**: Instant Chinese-English translations for detected objects
+- **Interactive Selection**: Click-to-select objects for detailed learning content
 
-2. Install the required packages:
-```bash
-pip install flask
-pip install boto3
-pip install python-dotenv
-```
+#### **2. Advanced Speech Processing**
 
-## AWS Configuration
+- **Speech-to-Text (STT)**: AWS Transcribe integration supporting 13+ languages
+- **Text-to-Speech (TTS)**: AWS Polly with neural voices and WAV output
+- **Pronunciation Assessment**: Speech SDK with detailed scoring metrics
+  - Accuracy Score (0-100)
+  - Fluency Score (0-100)
+  - Completeness Score (0-100)
+  - Prosody Score (0-100)
+  - Word-level error analysis
 
-1. Make sure you have AWS credentials configured either through:
-   - AWS CLI configuration
-   - Environment variables
-   - Or a .env file (recommended for development)
+#### **3. Personalized Learning System**
 
-2. If using a .env file, create one with your AWS credentials:
-```
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_DEFAULT_REGION=your_region
-```
+- **User Management**: Registration, authentication, and preference management
+- **Learning Analytics**: Daily check-ins, progress tracking, and streak counters
+- **Adaptive Curriculum**: Based on user's native language, target language, and proficiency level
+- **Interest-Based Content**: Personalized learning materials via n8n webhook integration
 
-## Running the Application
+#### **4. Multi-Language Support**
 
-1. Start the Flask application:
-```bash
-python app.py
-```
+- **Primary Languages**: Chinese (Simplified/Traditional), English, Japanese, Korean
+- **Extended Support**: Spanish, French, German, Portuguese, Italian, Russian, Arabic
+- **Dynamic Translation**: Real-time language switching and content localization
 
-2. Open your web browser and navigate to:
-```
-http://localhost:5000
-```
+### 🏗️ Technical Architecture
 
-## Features
+#### **Backend Services**
 
-- Responsive web design using Bootstrap
-- Dynamic content rendering with Flask templates
-- Data persistence using Amazon DynamoDB
-- Custom CSS and JavaScript implementations
-- Form handling and validation
-- Image assets management
+- **Main Application**: Flask-based web server with user management
+- **STT Service** (Port 3010): AWS Transcribe streaming API
+- **Pronunciation Service** (Port 3001): Microsoft Speech SDK assessment
+- **TTS Service** (Port 3011): AWS Polly neural voice synthesis
 
-## Additional Information
+#### **Database & Storage**
 
-- The application uses AOS (Animate On Scroll) library for animations
-- Bootstrap Icons for UI elements
-- Swiper for carousel/slider functionality
-- Custom PHP email form (in static/forms)
+- **DynamoDB Tables**: Users, preferences, chat logs, and learning analytics
+- **S3 Integration**: Audio file storage with CDN delivery
+- **Session Management**: Secure user authentication and state persistence
 
-## Project Dependencies
+#### **Computer Vision Pipeline**
 
-- Flask - Web framework
-- Boto3 - AWS SDK for Python
-- Bootstrap - Frontend framework
-- AOS - Animation library
-- Swiper - Touch slider
+- **AWS Rekognition**: Object detection with confidence scoring
+- **OpenCV**: Image preprocessing and overlay rendering
+- **Multi-Source Input**: Camera switching and photo upload capabilities
 
-## Development
+## 🛠️ Technology Stack
 
-To modify the application:
-- HTML templates are in the `templates/` directory
-- Static files (CSS, JS, images) are in the `static/` directory
-- Main application logic is in `app.py`
-- Database operations are handled through boto3 DynamoDB client
-=======
-# amadues
->>>>>>> ec345637682526557dd45f4615c8807ce7e80f35
+### **AI & Machine Learning**
+
+- AWS Rekognition (Computer Vision)
+- AWS Transcribe (Speech-to-Text)
+- AWS Polly (Text-to-Speech)
+- Microsoft Cognitive Services (Pronunciation Assessment)
+
+### **Backend Technologies**
+
+- **Python**: Flask web framework, OpenCV, Boto3
+- **Node.js**: Express.js microservices, Multer file handling
+- **AWS SDK**: Complete cloud integration
+
+### **Frontend & UI**
+
+- **HTML5/CSS3**: Responsive web interface
+- **JavaScript**: Real-time webcam streaming, AJAX communications
+- **Bootstrap**: Modern UI components and responsive design
+
+### **Cloud Infrastructure**
+
+- **AWS Services**: DynamoDB, S3, Rekognition, Transcribe, Polly
+- **Authentication**: AWS IAM and credential management
+- **Storage**: Multi-region S3 buckets with CDN
+
+## 📋 API Endpoints
+
+### **Main Flask Application**
+
+GET / # Home page
+POST /login # User authentication
+POST /register # User registration
+GET /dashboard # User dashboard
+GET /webcam # Main learning interface
+POST /log-selection # Log selected objects for learning
+GET /get-detections # Get current object detections
+POST /api/checkin # Daily learning check-in
+GET /api/checkin-stats # Learning analytics
+
+### **STT Service (Port 3010)**
+
+POST /speech-to-text # Single audio transcription
+POST /batch-speech-to-text # Batch audio processing
+GET /health # Service health check
+
+### **Pronunciation Service (Port 3001)**
+
+POST /pronunciation-assessment # Audio pronunciation scoring
+GET /languages # Supported languages
+GET /docs # API documentation
+
+### **TTS Service (Port 3011)**
+
+POST /tts # Text-to-speech conversion
+GET /health # Service health check
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- Node.js 14+
+- AWS Account with configured credentials
+
+### Installation
+
+1. **Clone the repository**
+   git clone https://github.com/gohyumin/amadues.git
+   cd amadues
+
+2. **Create virtual environment**
+   python -m venv venv
+   source venv/bin/activate # On Windows: venv\Scripts\activate
+
+3. **Install dependencies**
+   pip install -r requirements.txt
+
+4. **Configure environment variables**
+   AWS Configuration
+   export AWS_ACCESS_KEY_ID="your_access_key"
+   export AWS_SECRET_ACCESS_KEY="your_secret_key"
+   export AWS_REGION="ap-southeast-1"
+
+Microsoft Speech Service
+export SPEECH_KEY="your_speech_service_key"
+export REGION="southeastasia"
+
+API Security
+export API_KEY="your_secure_api_key"
+
+5. **Start the services**
+   Main Flask application
+   python app.py
+
+STT Service
+node server.js # (Port 3010)
+
+Pronunciation Service
+node server.js # (Port 3001)
+
+TTS Service
+node index.js # (Port 3011)
+
+## 📊 Learning Features
+
+### **Progress Tracking**
+
+- Daily learning streaks and check-ins
+- Pronunciation improvement metrics
+- Vocabulary acquisition tracking
+- Personalized learning recommendations
+
+### **Interactive Learning**
+
+- Point-and-learn object recognition
+- Voice practice with real-time feedback
+- Contextual vocabulary building
+- Cultural content integration
+
+### **Gamification Elements**
+
+- Achievement badges and milestones
+- Competitive learning streaks
+- Progress visualization and analytics
+- Social learning features
+
+## 🔧 Configuration
+
+### **Camera Setup**
+
+- **Laptop Camera**: Automatic detection (ports 0-2)
+- **Phone Camera**: IP webcam at `http://10.193.110.135:8080/video`
+- **Photo Upload**: JPEG/PNG support with automatic resizing
+
+### **Language Configuration**
+
+- **Default STT Language**: `zh-CN` (Chinese Simplified)
+- **Default TTS Voice**: `Ruth` (Neural voice)
+- **Translation Fallback**: Hardcoded dictionary with 50+ common objects
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- AWS for comprehensive cloud services
+- Microsoft Cognitive Services for speech technologies
+- OpenCV community for computer vision tools
+- Flask and Node.js communities for web frameworks
+
+## 📞 Support
+
+For support and questions:
+
+- Create an issue in this repository
+- Contact the development team
+- Check the documentation in `/docs`
+
+---
+
+**Built with ❤️ for language learners worldwide**
