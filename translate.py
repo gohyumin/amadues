@@ -12,11 +12,9 @@ _translation_cache: Dict[tuple, str] = {}
 
 # Fallback translations for offline/error cases
 ZH_CN_MAP = {
+    "head": "头", "chair": "椅子", "table": "桌子", "cup": "杯子","disposable cup": "一次性杯子", 
+    "beverage": "饮料", "coffee": "咖啡", "glasses": "眼镜", "accessories": "配饰", "bed": "床", "sunglasses": "太阳眼镜", 
     "person": "人", "bicycle": "自行车", "car": "汽车", "motorcycle": "摩托车",
-    "bus": "公共汽车", "train": "火车", "truck": "卡车", "boat": "船",
-    "traffic light": "红绿灯", "fire hydrant": "消防栓", "stop sign": "停止标志",
-    "parking meter": "停车计时器", "bench": "长凳", "bird": "鸟", "cat": "猫", "dog": "狗",
-    "horse": "马", "sheep": "羊", "cow": "牛", "elephant": "大象", "bear": "熊",
     "zebra": "斑马", "giraffe": "长颈鹿", "backpack": "背包", "umbrella": "雨伞",
     "handbag": "手提包", "tie": "领带", "suitcase": "手提箱", "frisbee": "飞盘",
     "skis": "滑雪板", "snowboard": "滑雪板", "sports ball": "运动球", "kite": "风筝",
@@ -33,7 +31,8 @@ ZH_CN_MAP = {
     "clock": "钟", "vase": "花瓶", "scissors": "剪刀", "teddy bear": "玩具熊",
     "hair drier": "吹风机", "toothbrush": "牙刷", "face": "脸", "teeth": "牙齿", 
     "wallet": "钱包", "bottle": "水瓶", "female": "女人", "smile": "微笑", 
-    "head": "头", "chair": "椅子", "table": "桌子"
+    "indoors": "室内", "interior design": "室内设计", "home decor": "房间设计", "furniture": "家具",
+    "bedroom": "卧室", "room": "房间", "cushion": "软垫", "bench": "椅子"    
 }
 
 def translate_with_mymemory(text: str, target_lang: str) -> str:
