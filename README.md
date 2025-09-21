@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Flask Web Application with DynamoDB
 
 This is a web application built using Flask (Python) and Amazon DynamoDB for the database.
@@ -116,3 +117,6 @@ To modify the application:
 - Static files (CSS, JS, images) are in the `static/` directory
 - Main application logic is in `app.py`
 - Database operations are handled through boto3 DynamoDB client
+=======
+# amadues
+>>>>>>> ec345637682526557dd45f4615c8807ce7e80f35
