@@ -1,0 +1,290 @@
+{
+  "name": "Related-item",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "related-item",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "660815d1-28c5-4680-8589-ace315ae06db",
+      "name": "Webhook",
+      "webhookId": "d844948a-b37e-4bd7-8a1e-34ac9377ae16"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.cn }},{{ $json.body.en }}",
+        "options": {
+          "systemMessage": "你是一个助手。用户会给你一个物品的中文名字和英文名字。  \n请输出一个JSON，包含：  \n1. related_items: 3个与该物品相关的中文和英文名字。  \n2. example_sentences: 3个句子，每个句子同时包含中文和英文，句子里要使用到这个物品。  \n\n必须是合法的JSON格式，不要输出其他内容。\n\n示例（请严格按上面结构输出，不要在真实输出中包含注释）：\n{\n  \"related_items\": [\n    {\"cn\": \"牛奶\", \"en\": \"milk\"},\n    {\"cn\": \"糖\", \"en\": \"sugar\"},\n    {\"cn\": \"杯子\", \"en\": \"cup\"}\n  ],\n  \"example_sentences\": [\n    {\"cn\": \"我早上喝了一杯咖啡。\", \"en\": \"I drank a cup of coffee this morning.\"},\n    {\"cn\": \"咖啡太烫了，小心别被烫到。\", \"en\": \"The coffee is too hot; be careful not to burn yourself.\"},\n    {\"cn\": \"我们去咖啡店坐坐吧。\", \"en\": \"Let's go to the coffee shop and sit for a while.\"}\n  ]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3dcb4782-5c9c-4fd0-9209-3dea5353e17f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "b61facde-996c-4271-9b59-8f678e94d0ac",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code 节点\nreturn items.map(item => {\n  let parsed;\n  try {\n    parsed = JSON.parse(item.json.output);  // 把 output 里的字符串解析成对象\n  } catch (e) {\n    throw new Error(\"JSON 解析失败: \" + e.message);\n  }\n\n  return {\n    json: parsed\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "2977f9b1-5875-413c-9a05-b43f723f27dc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "meta.llama3-70b-instruct-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "fb98becc-23af-44f4-bef6-c068372d4970",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "IFyeSduSbfRHAxXT",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/words",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "id": "be151d84-6b49-4b5e-b1ab-6243cf7cad5f",
+      "name": "POST2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1312,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://172.31.30.231:3005/api/profile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        -176
+      ],
+      "id": "049f4904-45f7-4d46-8c9a-a2f4b517de72",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/user-statistics/{{ $json.data.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        0
+      ],
+      "id": "eddabedf-48b5-4000-8306-08b84118a519",
+      "name": "Get Cache Statistics"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/profile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "0b334064-a098-4df2-afef-48837c944067",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://172.31.30.231:3005/api/user-statistics/{{ $json.data.users_id }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "id": "e180e48d-fe7f-47bb-a443-e899d8c10c80",
+      "name": "Update Statistics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1616,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const old = item.json;\n\n  return {\n    json: {\n      ...old,\n      data: {\n        ...old.data,\n        words_learned: (old.data.words_learned || 0) + 3\n      }\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        0
+      ],
+      "id": "8c9cd0bf-50b7-4466-a7c6-97367ea6ac7b",
+      "name": "Code in JavaScript4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "POST2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cache Statistics": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Get Cache Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Update Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "50e331c2-4f96-4458-bcfb-44944f915267",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "103a46b1e16c7dcad7372c67388b5377ecdcf9c2d3cb2af984f129ade87c3692"
+  },
+  "id": "ksjqJdms3YMOWRnp",
+  "tags": []
+}

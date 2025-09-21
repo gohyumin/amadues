@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Microservice API Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+        .section {
+            display: none;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .section.active {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #e5e7eb;
+            color: #374151;
+            cursor: pointer;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .tab-button:hover:not(.active) {
+            background: #d1d5db;
+        }
+        .section {
+            display: none;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0 0.5rem 0.5rem 0.5rem;
+            margin-top: 0;
+            animation: fadeIn 0.3s ease-in-out;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .json-display {
+            background: #1f2937;
+            color: #f3f4f6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background-color: #10b981; }
+        .status-offline { background-color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Storage Microservice API Demo</h1>
+            <p class="text-gray-600">暂存仓库微服务 API 演示页面</p>
+            <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-700">
+                    📡 <strong>所有API请求</strong> 都将发送到: <code class="bg-green-100 px-2 py-1 rounded">https://n8n.smart87.me/webhook-test/storage-service</code><br>
+                    📦 请求格式: <code class="bg-green-100 px-2 py-1 rounded">{"endpoint": "/api/xxx", "method": "GET/POST/PUT/DELETE", "data": {...}}</code>
+                </p>
+            </div>
+            <div class="mt-4 flex items-center justify-center">
+                <span class="status-indicator" id="status-indicator"></span>
+                <span id="service-status" class="text-sm font-medium">检查服务状态中...</span>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="flex space-x-1">
+                <button class="tab-button active" onclick="showSection('health')">🏥 健康检查</button>
+                <button class="tab-button" onclick="showSection('preferences')">👤 用户偏好</button>
+                <button class="tab-button" onclick="showSection('statistics')">📊 用户统计</button>
+                <button class="tab-button" onclick="showSection('chat')">💬 聊天历史</button>
+                <button class="tab-button" onclick="showSection('words')">📚 单词学习</button>
+                <button class="tab-button" onclick="showSection('profile')">🆔 用户资料</button>
+                <button class="tab-button" onclick="showSection('admin')">🔧 管理操作</button>
+            </nav>
+        </div>
+
+        <!-- Health Check Section -->
+        <div id="health-section" class="section active">
+            <h2 class="text-xl font-semibold mb-4">🏥 健康检查</h2>
+            <div class="space-y-4">
+                <button onclick="checkHealth()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    检查服务健康状态
+                </button>
+                <div id="health-result" class="json-display"></div>
+            </div>
+        </div>
+
+        <!-- User Preferences Section -->
+        <div id="preferences-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">👤 用户偏好管理</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">创建/更新用户偏好</h3>
+                    <div class="space-y-2">
+                        <input id="pref-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                        <input id="pref-age" type="number" placeholder="年龄" class="w-full p-2 border rounded">
+                        <input id="pref-country" type="text" placeholder="国家" class="w-full p-2 border rounded">
+                        <input id="pref-interest1" type="text" placeholder="兴趣1" class="w-full p-2 border rounded">
+                        <input id="pref-interest2" type="text" placeholder="兴趣2" class="w-full p-2 border rounded">
+                        <input id="pref-level" type="text" placeholder="等级" class="w-full p-2 border rounded">
+                        <input id="pref-native-lang" type="text" placeholder="母语" class="w-full p-2 border rounded">
+                        <input id="pref-target-lang" type="text" placeholder="目标语言" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="createUserPreference()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            创建偏好
+                        </button>
+                        <button onclick="updateUserPreference()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+                            更新偏好
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">查询/删除用户偏好</h3>
+                    <input id="query-pref-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                    <div class="flex space-x-2">
+                        <button onclick="getUserPreference()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                            查询偏好
+                        </button>
+                        <button onclick="deleteUserPreference()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            删除偏好
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="preferences-result" class="json-display mt-4"></div>
+        </div>
+
+        <!-- User Statistics Section -->
+        <div id="statistics-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">📊 用户统计管理</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">创建/更新用户统计</h3>
+                    <div class="space-y-2">
+                        <input id="stat-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                        <input id="stat-accuracy" type="number" placeholder="准确率 (0-100)" class="w-full p-2 border rounded">
+                        <input id="stat-intonation" type="number" placeholder="语调分数 (0-100)" class="w-full p-2 border rounded">
+                        <input id="stat-words-learned" type="number" placeholder="已学词汇数" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="createUserStatistic()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            创建统计
+                        </button>
+                        <button onclick="updateUserStatistic()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+                            更新统计
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">查询/删除用户统计</h3>
+                    <input id="query-stat-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                    <div class="flex space-x-2">
+                        <button onclick="getUserStatistic()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                            查询统计
+                        </button>
+                        <button onclick="deleteUserStatistic()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            删除统计
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="statistics-result" class="json-display mt-4"></div>
+        </div>
+
+        <!-- Chat History Section -->
+        <div id="chat-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">💬 聊天历史管理</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">添加聊天消息</h3>
+                    <div class="space-y-2">
+                        <input id="chat-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                        <select id="chat-sender" class="w-full p-2 border rounded">
+                            <option value="user">用户消息</option>
+                            <option value="assistant">助手回复</option>
+                        </select>
+                        <select id="chat-message-type" class="w-full p-2 border rounded">
+                            <option value="text">文本消息</option>
+                            <option value="audio">语音消息</option>
+                        </select>
+                        <textarea id="chat-message-content" placeholder="消息内容" class="w-full p-2 border rounded h-20"></textarea>
+                        <input id="chat-audio-path" type="text" placeholder="音频路径 (可选)" class="w-full p-2 border rounded">
+                    </div>
+                    <button onclick="addChatMessage()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        添加消息
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">查询聊天历史</h3>
+                    <input id="query-chat-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                    <button onclick="getChatHistory()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                        查询历史
+                    </button>
+                    
+                    <h3 class="text-lg font-medium mt-6">删除操作</h3>
+                    <input id="delete-message-id" type="text" placeholder="消息ID" class="w-full p-2 border rounded">
+                    <div class="flex space-x-2">
+                        <button onclick="getMessageById()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            查询消息
+                        </button>
+                        <button onclick="deleteMessage()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            删除消息
+                        </button>
+                    </div>
+                    
+                    <input id="delete-chat-user-id" type="text" placeholder="用户ID（删除所有）" class="w-full p-2 border rounded">
+                    <button onclick="deleteAllUserMessages()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
+                        删除用户所有消息
+                    </button>
+                </div>
+            </div>
+            <div id="chat-result" class="json-display mt-4"></div>
+        </div>
+
+        <!-- Words Learning Section -->
+        <div id="words-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">📚 单词学习管理</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">添加学习单词</h3>
+                    <div class="space-y-2">
+                        <input id="word-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                        <input id="word-native" type="text" placeholder="母语单词 (例: 苹果)" class="w-full p-2 border rounded">
+                        <input id="word-target" type="text" placeholder="目标语言单词 (例: apple)" class="w-full p-2 border rounded">
+                    </div>
+                    <button onclick="addWord()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        添加单词
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">查询用户单词</h3>
+                    <input id="query-word-user-id" type="text" placeholder="用户ID" class="w-full p-2 border rounded">
+                    <button onclick="getUserWords()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                        查询单词列表
+                    </button>
+                    
+                    <h3 class="text-lg font-medium mt-6">单词操作</h3>
+                    <input id="word-id" type="text" placeholder="单词ID" class="w-full p-2 border rounded">
+                    <div class="flex space-x-2">
+                        <button onclick="getWordById()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            查询单词
+                        </button>
+                        <button onclick="deleteWord()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            删除单词
+                        </button>
+                    </div>
+                    
+                    <h3 class="text-lg font-medium mt-6">更新单词</h3>
+                    <input id="update-word-id" type="text" placeholder="要更新的单词ID" class="w-full p-2 border rounded">
+                    <input id="update-native" type="text" placeholder="新的母语单词" class="w-full p-2 border rounded">
+                    <input id="update-target" type="text" placeholder="新的目标语言单词" class="w-full p-2 border rounded">
+                    <button onclick="updateWord()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded w-full">
+                        更新单词
+                    </button>
+                    
+                    <input id="clear-word-user-id" type="text" placeholder="用户ID（清空所有）" class="w-full p-2 border rounded">
+                    <button onclick="clearUserWords()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
+                        清空用户所有单词
+                    </button>
+                </div>
+            </div>
+            <div id="words-result" class="json-display mt-4"></div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">🆔 用户资料</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">查看用户资料</h3>
+                    <button onclick="getProfile()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        获取用户资料
+                    </button>
+                    <div id="profile-display" class="bg-gray-100 p-3 rounded text-sm"></div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">创建/更新用户资料</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">邮箱:</label>
+                            <input type="email" id="profile-email" placeholder="user@example.com" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">用户名:</label>
+                            <input type="text" id="profile-username" placeholder="username" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">密码:</label>
+                            <input type="password" id="profile-password" placeholder="password" class="w-full px-3 py-2 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">用户ID (可选):</label>
+                            <input type="text" id="profile-id" placeholder="留空自动生成" class="w-full px-3 py-2 border rounded">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="createProfile()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            创建资料
+                        </button>
+                        <button onclick="updateProfile()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                            更新资料
+                        </button>
+                        <button onclick="deleteProfile()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                            删除资料
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Section -->
+        <div id="admin-section" class="section">
+            <h2 class="text-xl font-semibold mb-4">🔧 管理操作</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">系统统计</h3>
+                    <button onclick="getSystemStats()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">
+                        获取系统统计
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium">数据导出</h3>
+                    <button onclick="exportAllPreferences()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">
+                        导出所有偏好
+                    </button>
+                    <button onclick="exportAllStatistics()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">
+                        导出所有统计
+                    </button>
+                    <button onclick="exportAllWords()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">
+                        导出所有单词
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h3 class="text-lg font-medium text-red-600 mb-2">⚠️ 危险操作</h3>
+                <button onclick="clearAllData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full">
+                    清空所有数据
+                </button>
+            </div>
+            <div id="admin-result" class="json-display mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n.smart87.me/webhook-test/storage-service';
+
+        const showSection = (sectionName) => {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        };
+
+        const updateServiceStatus = (isOnline) => {
+            const indicator = document.getElementById('status-indicator');
+            const status = document.getElementById('service-status');
+            
+            if (isOnline) {
+                indicator.className = 'status-indicator status-online';
+                status.textContent = '服务在线';
+                status.className = 'text-sm font-medium success';
+            } else {
+                indicator.className = 'status-indicator status-offline';
+                status.textContent = '服务离线';
+                status.className = 'text-sm font-medium error';
+            }
+        };
+
+        const displayResult = (elementId, data, isError = false) => {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            if (isError) {
+                element.style.borderLeft = '4px solid #ef4444';
+            } else {
+                element.style.borderLeft = '4px solid #10b981';
+            }
+        };
+
+        const makeApiRequest = async (endpoint, method = 'GET', data = null) => {
+            try {
+                // 所有请求都统一使用POST发送到webhook URL
+                const url = WEBHOOK_URL;
+
+                const options = {
+                    method: 'POST', // 统一使用POST方法
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                // 将原始请求信息包装发送到webhook
+                const payload = {
+                    endpoint: endpoint,
+                    method: method,
+                    data: data
+                };
+
+                options.body = JSON.stringify(payload);
+
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${result.error || '请求失败'}`);
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API请求失败:', error);
+                throw error;
+            }
+        };
+
+        // Health Check Functions
+        const checkHealth = async () => {
+            try {
+                const result = await makeApiRequest('/api/health');
+                displayResult('health-result', result);
+                updateServiceStatus(true);
+            } catch (error) {
+                displayResult('health-result', { error: error.message }, true);
+                updateServiceStatus(false);
+            }
+        };
+
+        // User Preferences Functions
+        const createUserPreference = async () => {
+            const data = {
+                users_id: document.getElementById('pref-user-id').value,
+                age: parseInt(document.getElementById('pref-age').value) || 0,
+                country: document.getElementById('pref-country').value,
+                interest1: document.getElementById('pref-interest1').value,
+                interest2: document.getElementById('pref-interest2').value,
+                level: document.getElementById('pref-level').value,
+                native_language: document.getElementById('pref-native-lang').value,
+                target_language: document.getElementById('pref-target-lang').value
+            };
+
+            try {
+                const result = await makeApiRequest('/api/user-preferences', 'POST', data);
+                displayResult('preferences-result', result);
+            } catch (error) {
+                displayResult('preferences-result', { error: error.message }, true);
+            }
+        };
+
+        const getUserPreference = async () => {
+            const userId = document.getElementById('query-pref-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/user-preferences/${userId}`);
+                displayResult('preferences-result', result);
+            } catch (error) {
+                displayResult('preferences-result', { error: error.message }, true);
+            }
+        };
+
+        const updateUserPreference = async () => {
+            const userId = document.getElementById('pref-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            const data = {
+                age: parseInt(document.getElementById('pref-age').value) || 0,
+                country: document.getElementById('pref-country').value,
+                interest1: document.getElementById('pref-interest1').value,
+                interest2: document.getElementById('pref-interest2').value,
+                level: document.getElementById('pref-level').value,
+                native_language: document.getElementById('pref-native-lang').value,
+                target_language: document.getElementById('pref-target-lang').value
+            };
+
+            try {
+                const result = await makeApiRequest(`/api/user-preferences/${userId}`, 'PUT', data);
+                displayResult('preferences-result', result);
+            } catch (error) {
+                displayResult('preferences-result', { error: error.message }, true);
+            }
+        };
+
+        const deleteUserPreference = async () => {
+            const userId = document.getElementById('query-pref-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/user-preferences/${userId}`, 'DELETE');
+                displayResult('preferences-result', result);
+            } catch (error) {
+                displayResult('preferences-result', { error: error.message }, true);
+            }
+        };
+
+        // User Statistics Functions
+        const createUserStatistic = async () => {
+            const data = {
+                users_id: document.getElementById('stat-user-id').value,
+                accuracy: parseInt(document.getElementById('stat-accuracy').value) || 0,
+                intonation: parseInt(document.getElementById('stat-intonation').value) || 0,
+                words_learned: parseInt(document.getElementById('stat-words-learned').value) || 0
+            };
+
+            try {
+                const result = await makeApiRequest('/api/user-statistics', 'POST', data);
+                displayResult('statistics-result', result);
+            } catch (error) {
+                displayResult('statistics-result', { error: error.message }, true);
+            }
+        };
+
+        const getUserStatistic = async () => {
+            const userId = document.getElementById('query-stat-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/user-statistics/${userId}`);
+                displayResult('statistics-result', result);
+            } catch (error) {
+                displayResult('statistics-result', { error: error.message }, true);
+            }
+        };
+
+        const updateUserStatistic = async () => {
+            const userId = document.getElementById('stat-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            const data = {
+                accuracy: parseInt(document.getElementById('stat-accuracy').value) || 0,
+                intonation: parseInt(document.getElementById('stat-intonation').value) || 0,
+                words_learned: parseInt(document.getElementById('stat-words-learned').value) || 0
+            };
+
+            try {
+                const result = await makeApiRequest(`/api/user-statistics/${userId}`, 'PUT', data);
+                displayResult('statistics-result', result);
+            } catch (error) {
+                displayResult('statistics-result', { error: error.message }, true);
+            }
+        };
+
+        const deleteUserStatistic = async () => {
+            const userId = document.getElementById('query-stat-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/user-statistics/${userId}`, 'DELETE');
+                displayResult('statistics-result', result);
+            } catch (error) {
+                displayResult('statistics-result', { error: error.message }, true);
+            }
+        };
+
+        // Chat History Functions
+        const addChatMessage = async () => {
+            const data = {
+                users_id: document.getElementById('chat-user-id').value,
+                sender: document.getElementById('chat-sender').value,
+                message: {
+                    type: document.getElementById('chat-message-type').value,
+                    content: document.getElementById('chat-message-content').value,
+                    audio_path: document.getElementById('chat-audio-path').value || ''
+                }
+            };
+
+            try {
+                const result = await makeApiRequest('/api/chat-histories', 'POST', data);
+                displayResult('chat-result', result);
+                
+                // Clear form
+                document.getElementById('chat-message-content').value = '';
+                document.getElementById('chat-audio-path').value = '';
+            } catch (error) {
+                displayResult('chat-result', { error: error.message }, true);
+            }
+        };
+
+        const getChatHistory = async () => {
+            const userId = document.getElementById('query-chat-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/chat-histories/${userId}`);
+                displayResult('chat-result', result);
+            } catch (error) {
+                displayResult('chat-result', { error: error.message }, true);
+            }
+        };
+
+        const getMessageById = async () => {
+            const messageId = document.getElementById('delete-message-id').value;
+            if (!messageId) {
+                alert('请输入消息ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/chat-histories/message/${messageId}`);
+                displayResult('chat-result', result);
+            } catch (error) {
+                displayResult('chat-result', { error: error.message }, true);
+            }
+        };
+
+        const deleteMessage = async () => {
+            const messageId = document.getElementById('delete-message-id').value;
+            if (!messageId) {
+                alert('请输入消息ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/chat-histories/message/${messageId}`, 'DELETE');
+                displayResult('chat-result', result);
+            } catch (error) {
+                displayResult('chat-result', { error: error.message }, true);
+            }
+        };
+
+        const deleteAllUserMessages = async () => {
+            const userId = document.getElementById('delete-chat-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            if (!confirm(`确定要删除用户 ${userId} 的所有聊天记录吗？`)) {
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/chat-histories/${userId}`, 'DELETE');
+                displayResult('chat-result', result);
+            } catch (error) {
+                displayResult('chat-result', { error: error.message }, true);
+            }
+        };
+
+        // Words Learning Functions
+        const addWord = async () => {
+            const data = {
+                users_id: document.getElementById('word-user-id').value,
+                native_word: document.getElementById('word-native').value,
+                target_word: document.getElementById('word-target').value
+            };
+
+            if (!data.users_id || !data.native_word || !data.target_word) {
+                alert('请填写所有必需字段');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest('/api/words', 'POST', data);
+                displayResult('words-result', result);
+                
+                // Clear form
+                document.getElementById('word-native').value = '';
+                document.getElementById('word-target').value = '';
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        const getUserWords = async () => {
+            const userId = document.getElementById('query-word-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/words/${userId}`);
+                displayResult('words-result', result);
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        const getWordById = async () => {
+            const wordId = document.getElementById('word-id').value;
+            if (!wordId) {
+                alert('请输入单词ID');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/word/${wordId}`);
+                displayResult('words-result', result);
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        const updateWord = async () => {
+            const wordId = document.getElementById('update-word-id').value;
+            if (!wordId) {
+                alert('请输入要更新的单词ID');
+                return;
+            }
+
+            const data = {};
+            const nativeWord = document.getElementById('update-native').value;
+            const targetWord = document.getElementById('update-target').value;
+            
+            if (nativeWord) data.native_word = nativeWord;
+            if (targetWord) data.target_word = targetWord;
+            
+            if (Object.keys(data).length === 0) {
+                alert('请至少填写一个要更新的字段');
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/word/${wordId}`, 'PUT', data);
+                displayResult('words-result', result);
+                
+                // Clear form
+                document.getElementById('update-native').value = '';
+                document.getElementById('update-target').value = '';
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        const deleteWord = async () => {
+            const wordId = document.getElementById('word-id').value;
+            if (!wordId) {
+                alert('请输入单词ID');
+                return;
+            }
+
+            if (!confirm(`确定要删除单词 ${wordId} 吗？`)) {
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/word/${wordId}`, 'DELETE');
+                displayResult('words-result', result);
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        const clearUserWords = async () => {
+            const userId = document.getElementById('clear-word-user-id').value;
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+
+            if (!confirm(`确定要清空用户 ${userId} 的所有学习单词吗？`)) {
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest(`/api/words/${userId}`, 'DELETE');
+                displayResult('words-result', result);
+            } catch (error) {
+                displayResult('words-result', { error: error.message }, true);
+            }
+        };
+
+        // Admin Functions
+        const getSystemStats = async () => {
+            try {
+                const result = await makeApiRequest('/api/stats');
+                displayResult('admin-result', result);
+            } catch (error) {
+                displayResult('admin-result', { error: error.message }, true);
+            }
+        };
+
+        const exportAllPreferences = async () => {
+            try {
+                const result = await makeApiRequest('/api/user-preferences');
+                displayResult('admin-result', result);
+            } catch (error) {
+                displayResult('admin-result', { error: error.message }, true);
+            }
+        };
+
+        const exportAllStatistics = async () => {
+            try {
+                const result = await makeApiRequest('/api/user-statistics');
+                displayResult('admin-result', result);
+            } catch (error) {
+                displayResult('admin-result', { error: error.message }, true);
+            }
+        };
+
+        const exportAllWords = async () => {
+            try {
+                const result = await makeApiRequest('/api/words');
+                displayResult('admin-result', result);
+            } catch (error) {
+                displayResult('admin-result', { error: error.message }, true);
+            }
+        };
+
+        const clearAllData = async () => {
+            if (!confirm('⚠️ 确定要清空所有数据吗？此操作不可撤销！')) {
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest('/api/clear-all', 'POST');
+                displayResult('admin-result', result);
+            } catch (error) {
+                displayResult('admin-result', { error: error.message }, true);
+            }
+        };
+
+        // Profile functions
+        const getProfile = async () => {
+            try {
+                const result = await makeApiRequest('/api/profile', 'GET');
+                displayResult('profile-display', result);
+            } catch (error) {
+                displayResult('profile-display', { error: error.message }, true);
+            }
+        };
+
+        const createProfile = async () => {
+            const email = document.getElementById('profile-email').value.trim();
+            const username = document.getElementById('profile-username').value.trim();
+            const password = document.getElementById('profile-password').value;
+            const id = document.getElementById('profile-id').value.trim();
+
+            if (!email || !username || !password) {
+                displayResult('profile-display', { error: '邮箱、用户名和密码都是必填项' }, true);
+                return;
+            }
+
+            const profileData = { email, username, password_hash: password };
+            if (id) {
+                profileData.id = id;
+            }
+
+            try {
+                const result = await makeApiRequest('/api/profile', 'POST', profileData);
+                displayResult('profile-display', result);
+                // Clear form after successful creation
+                document.getElementById('profile-email').value = '';
+                document.getElementById('profile-username').value = '';
+                document.getElementById('profile-password').value = '';
+                document.getElementById('profile-id').value = '';
+            } catch (error) {
+                displayResult('profile-display', { error: error.message }, true);
+            }
+        };
+
+        const updateProfile = async () => {
+            const email = document.getElementById('profile-email').value.trim();
+            const username = document.getElementById('profile-username').value.trim();
+            const password = document.getElementById('profile-password').value;
+
+            if (!email && !username && !password) {
+                displayResult('profile-display', { error: '至少需要提供一个字段进行更新' }, true);
+                return;
+            }
+
+            const updateData = {};
+            if (email) updateData.email = email;
+            if (username) updateData.username = username;
+            if (password) updateData.password_hash = password;
+
+            try {
+                const result = await makeApiRequest('/api/profile', 'PUT', updateData);
+                displayResult('profile-display', result);
+                // Clear form after successful update
+                document.getElementById('profile-email').value = '';
+                document.getElementById('profile-username').value = '';
+                document.getElementById('profile-password').value = '';
+                document.getElementById('profile-id').value = '';
+            } catch (error) {
+                displayResult('profile-display', { error: error.message }, true);
+            }
+        };
+
+        const deleteProfile = async () => {
+            if (!confirm('⚠️ 确定要删除用户资料吗？此操作不可撤销！')) {
+                return;
+            }
+
+            try {
+                const result = await makeApiRequest('/api/profile', 'DELETE');
+                displayResult('profile-display', result);
+                // Clear form after successful deletion
+                document.getElementById('profile-email').value = '';
+                document.getElementById('profile-username').value = '';
+                document.getElementById('profile-password').value = '';
+                document.getElementById('profile-id').value = '';
+            } catch (error) {
+                displayResult('profile-display', { error: error.message }, true);
+            }
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check health on startup
+            checkHealth();
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    // Ctrl+Enter 快捷键触发当前页面的主要操作
+                    const activeSection = document.querySelector('.section.active');
+                    if (activeSection) {
+                        const primaryBtn = activeSection.querySelector('button[onclick*="create"], button[onclick*="check"], button[onclick*="add"]');
+                        if (primaryBtn) {
+                            primaryBtn.click();
+                        }
+                    }
+                }
+            });
+
+            console.log('Storage API Demo 已加载完成');
+            console.log('📡 所有API请求都将发送到:', WEBHOOK_URL);
+            console.log('📦 请求格式: {"endpoint": "/api/xxx", "method": "HTTP_METHOD", "data": {...}}');
+            console.log('提示：您可以使用 Ctrl+Enter 快捷键触发主要操作');
+        });
+    </script>
+</body>
+</html>

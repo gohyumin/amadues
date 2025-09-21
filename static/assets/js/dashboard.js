@@ -1,3 +1,92 @@
+// 根据API response动态填充统计卡片内容
+function updateDashboardStatsFromApi(stat) {
+  if (stat) {
+    const wordsElem = document.getElementById('wordsLearned');
+    const accuracyElem = document.getElementById('accuracy');
+    const intonationElem = document.getElementById('intonation');
+    const totalDaysElem = document.getElementById('totalDays');
+    if (wordsElem) wordsElem.textContent = stat.words_learned ?? '--';
+    if (accuracyElem) accuracyElem.textContent = stat.accuracy !== undefined ? stat.accuracy + '%' : '--';
+    if (intonationElem) intonationElem.textContent = stat.intonation !== undefined ? stat.intonation + '%' : '--';
+    if (totalDaysElem) totalDaysElem.textContent = stat.words_learned ? Math.floor(stat.words_learned / 10) : '--'; // 示例：假设每10词一天
+  }
+}
+
+// 请求dashboard API并填充统计卡片
+dashboardApiRequest('/api/dashboard', 'GET', {}).then(res => {
+  console.log('Dashboard API response:', res);
+  if (res && res.dashboard) {
+    updateDashboardStatsFromApi(res.dashboard);
+  }
+}).catch(err => {
+  console.error('Dashboard API error:', err);
+});
+// 统一API请求方法，兼容 dashboard 数据
+const DASHBOARD_API_URL = '/api/dashboard';
+async function dashboardApiRequest(endpoint, method = 'GET', data = null) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    };
+    const payload = { endpoint, method, data };
+    options.body = JSON.stringify(payload);
+    const response = await fetch(DASHBOARD_API_URL, options);
+    const result = await response.json();
+    if (!response.ok || result.success === false) {
+      throw new Error(result.error || result.message || `HTTP ${response.status}`);
+    }
+    return result;
+  } catch (error) {
+    console.error('Dashboard API请求失败:', error);
+    showDashboardError(error.message || error);
+    throw error;
+  }
+}
+
+function showDashboardError(message) {
+  let errorContainer = document.getElementById('dashboardErrorContainer');
+  if (!errorContainer) {
+    errorContainer = document.createElement('div');
+    errorContainer.id = 'dashboardErrorContainer';
+    errorContainer.className = 'alert alert-danger';
+    document.body.appendChild(errorContainer);
+  }
+  errorContainer.textContent = 'Dashboard数据加载失败: ' + message;
+  errorContainer.style.display = 'block';
+}
+
+// 示例：请求dashboard API并打印结果
+dashboardApiRequest('', 'GET', {}).then(res => {
+  console.log('Dashboard API response:', res);
+}).catch(err => {
+  console.error('Dashboard API error:', err);
+});
+// 调试dashboard API请求和响应
+const dashboardPayload = { endpoint: '/api/user-statistics', method: 'GET', data: {} };
+console.log('Dashboard API request payload:', dashboardPayload);
+dashboardApiRequest(dashboardPayload.endpoint, dashboardPayload.method, dashboardPayload.data)
+  .then(res => {
+    console.log('Dashboard API response:', res);
+    if (res && res.dashboard) {
+      // 假设返回结构为 { dashboard: { user_id, accuracy, intonation, words_learned, timestamp } }
+      const statisticData = res.dashboard;
+      console.log('statisticData:', statisticData);
+      // 如果需要，可以构造 UserStatistic 实例
+      // const statistic = new UserStatistic(
+      //   statisticData.user_id,
+      //   statisticData.accuracy,
+      //   statisticData.intonation,
+      //   statisticData.words_learned,
+      //   statisticData.timestamp
+      // );
+      // console.log('UserStatistic:', statistic);
+    }
+  })
+  .catch(err => {
+    console.error('Dashboard API error:', err);
+  });
+// ...existing code...
 // Reveal dashboard content after overlay animation
 window.addEventListener('load', function(){
   setTimeout(function(){

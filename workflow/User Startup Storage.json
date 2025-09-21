@@ -1,0 +1,489 @@
+{
+  "name": "User Startup Storage",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-startup",
+        "options": {}
+      },
+      "id": "eb4637b3-79f0-46d3-be54-6356fd6177b4",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        464
+      ],
+      "webhookId": "3007473c-d7f3-4835-9e76-704f01ac29d3"
+    },
+    {
+      "parameters": {
+        "url": "https://ho8nx5ml11.execute-api.ap-southeast-1.amazonaws.com/default/get_lamda",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"httpMethod\": \"GET\",\n  \"table\": \"users_preferences\",\n  \"users_id\": \"{{ $json.data.id }}\"\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "0de05bbd-ade0-4626-b0b6-bd2878401129",
+      "name": "Get User Preferences",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        32,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://ho8nx5ml11.execute-api.ap-southeast-1.amazonaws.com/default/get_lamda",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"httpMethod\": \"GET\",\n  \"table\": \"users_statistics\",\n  \"users_id\": \"{{ $json.data.id }}\"\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "171e07b5-d320-452e-a924-1730527a7c42",
+      "name": "Get User Statistics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        32,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://ho8nx5ml11.execute-api.ap-southeast-1.amazonaws.com/default/get_lamda",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"httpMethod\": \"GET\",\n  \"table\": \"chat_logs\",\n  \"users_id\": \"{{ $json.data.id }}\"\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "e8624c76-12f1-4bcf-8f76-d584e6dc7d5d",
+      "name": "Get Chat Logs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        32,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ho8nx5ml11.execute-api.ap-southeast-1.amazonaws.com/default/get_lamda",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"httpMethod\": \"GET\",\n  \"table\": \"words\",\n  \"users_id\": \"{{ $json.data.id }}\"\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "7a25fa2c-f47f-4ada-97de-86a39e69460c",
+      "name": "Get User Word",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        32,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/user-preferences",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "id": "1838dc0a-715c-4ed4-ba28-eb4d7f7c0d4c",
+      "name": "POST",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        240,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/user-statistics",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "id": "82b5bf0d-26b5-43f6-a58b-b2cb30a83ea5",
+      "name": "POST1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        240,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/words",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "1df13e75-d795-4c46-b55e-539ba3c19ad5",
+      "name": "POST2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        672,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/chat-histories",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"sender\": \"user\", \"message\": {\"type\": \"text\", \"content\": \"明白了！继续和我聊天吧，这样可以帮助你提高语言能力。\"}, \"users_id\": \"6fab6bba-d8dd-419e-a97f-c6381d95c96e\", \"chatbot_logs_id\": \"06ed5bd6-f001-4f0d-bc83-e5eb3594e182\", \"timestamp\": 1758357013}",
+        "options": {}
+      },
+      "id": "b999b738-369a-4a36-b1f0-57fed2783e65",
+      "name": "POST3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1072,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        864
+      ],
+      "id": "ced82b9d-f013-4537-9a16-e937102375de",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 单条输入场景\nconst input = $input.first().json.data || \"\";\n\n// 帮你看两种“看得见/看不见”的情况\nconst stringified = JSON.stringify(input);    // 用于查看字符串的 JSON 表示（会显示转义）\nconst hasEscaped = /\\\\n/.test(stringified);   // 文本里是否包含字面 \"\\n\"\nconst hasRealNewline = /\\n/.test(input);      // 文本里是否包含实际换行字符\n\n// 三种处理（按需使用）\n// 1) 删除字面 \\n （把两个字符 \"\\\" + \"n\" 删掉）\nlet cleaned_remove_escaped = input.replace(/\\\\n/g, \"\");\n\n// 2) 把字面 \\n 转成真实的换行\nlet cleaned_convert_to_newline = input.replace(/\\\\n/g, \"\\n\");\n\n// 3) 删除真实的换行（包括 \\r\\n）\nlet cleaned_remove_real = input.replace(/\\r\\n/g, \"\").replace(/\\n/g, \"\");\n\nreturn {\n  json: {\n    original: input,\n    stringified,\n    hasEscaped,\n    hasRealNewline,\n    cleaned_remove_escaped,\n    cleaned_convert_to_newline,\n    cleaned_remove_real\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        864
+      ],
+      "id": "31e9381b-15ce-4dd6-98e5-c8a0371c3635",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 假设你的字符串在 $json.body\nconst jsonString = $input.first().json.cleaned_remove_real;\n\n// 解析字符串\nlet messages;\ntry {\n  messages = JSON.parse(jsonString);\n} catch (err) {\n  throw new Error(\"Invalid JSON string\");\n}\n\n// 输出每条消息为一个 item\nreturn messages.map(msg => ({ json: msg }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        864
+      ],
+      "id": "68b86599-c563-43df-9158-4f101558f73f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "=https://az8fy1pepe.execute-api.ap-southeast-1.amazonaws.com/default/getUser?email={{ $('Webhook Trigger').item.json.body.email }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "0d5f8b5e-51e7-4fd5-bf8c-0358701ac3a6",
+      "name": "Get Chat Logs1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -480,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.31.30.231:3005/api/clear-all",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -688,
+        464
+      ],
+      "id": "b5f3eb67-b1c9-4599-b329-d678ce2bf228",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/profile",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "f07013c2-1ca1-43a2-8701-0f6e41dff8de",
+      "name": "POST PROFILE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -272,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        464,
+        528
+      ],
+      "id": "f61f3d7d-d4e9-4691-b642-db02056c2a20",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 假设你的字符串在 $json.body\nconst jsonString = $input.first().json.data;\n\n// 解析字符串\nlet messages;\ntry {\n  messages = JSON.parse(jsonString);\n} catch (err) {\n  throw new Error(\"Invalid JSON string\");\n}\n\n// 输出每条消息为一个 item\nreturn messages.map(msg => ({ json: msg }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        528
+      ],
+      "id": "f48fd6a1-1b88-44b6-afe0-8ab5b5b24179",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Preferences": {
+      "main": [
+        [
+          {
+            "node": "POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Statistics": {
+      "main": [
+        [
+          {
+            "node": "POST1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chat Logs": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Word": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "POST3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chat Logs1": {
+      "main": [
+        [
+          {
+            "node": "POST PROFILE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Get Chat Logs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST PROFILE": {
+      "main": [
+        [
+          {
+            "node": "Get User Statistics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get User Preferences",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get User Word",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Chat Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "POST2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1d69b051-a8e3-4851-8f00-0c60f51b3cd1",
+  "meta": {
+    "instanceId": "103a46b1e16c7dcad7372c67388b5377ecdcf9c2d3cb2af984f129ade87c3692"
+  },
+  "id": "RZ2JpdfLQR2vbmei",
+  "tags": []
+}

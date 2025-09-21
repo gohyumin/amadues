@@ -1,0 +1,150 @@
+{
+  "name": "MemoryMCP",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "9eff9c03-b168-44a6-bd95-5d01f3166cb1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -144
+      ],
+      "id": "0ca51ded-b544-4b2e-97db-dcb199b354d9",
+      "name": "MCP Server Trigger",
+      "webhookId": "9eff9c03-b168-44a6-bd95-5d01f3166cb1"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/words/{{ $json.data.id }}",
+        "options": {}
+      },
+      "id": "6d09df7f-f4a3-4190-9763-e06aa72ffd84",
+      "name": "GET",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        416,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://172.31.30.231:3005/api/profile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        -160
+      ],
+      "id": "6ebcb722-f886-48e7-a88c-f6d36b9bfec0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "History"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        -160
+      ],
+      "id": "a32d75ed-0db7-4b9d-813b-636f00643984",
+      "name": "Get User History Learned Word"
+    },
+    {
+      "parameters": {
+        "description": "Used to obtain all the historical words that the user has learned, helping the user to quickly recall the content",
+        "workflowId": {
+          "__rl": true,
+          "value": "Jztsgm7H9iawFww1",
+          "mode": "list",
+          "cachedResultName": "MemoryMCP"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "History",
+              "displayName": "History",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        64
+      ],
+      "id": "0a92d003-1d99-477c-9a89-2561cb5338cf",
+      "name": "Call 'MemoryMCP'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User History Learned Word": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'MemoryMCP'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "809a16f4-608e-47cd-b5e4-9caca7a01f3a",
+  "meta": {
+    "instanceId": "103a46b1e16c7dcad7372c67388b5377ecdcf9c2d3cb2af984f129ade87c3692"
+  },
+  "id": "Jztsgm7H9iawFww1",
+  "tags": []
+}

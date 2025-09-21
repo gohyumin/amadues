@@ -1,0 +1,497 @@
+{
+  "name": "AudioFlow",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.31.30.231:3001/pronunciation-assessment",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"X-API-Key\": \"mykey\"\n}\n",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "audio",
+              "inputDataFieldName": "=audio"
+            },
+            {
+              "name": "referenceText",
+              "value": "={{ $json.data.recognizedText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a58d49fe-a2ca-4700-8e07-e480c7697215",
+      "name": "Transcribe with OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        320,
+        112
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pronunciation-assessment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "75813e4b-ec73-45f6-9366-6d06fa87095a",
+      "name": "Webhook containing audio to transcribe",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -496,
+        128
+      ],
+      "webhookId": "6a06f5e4-9105-4780-9840-9b7619a25647",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "76b94e72-e6e8-4b62-bf0d-1a7ed2b6090a",
+      "name": "Respond to Webhook with transcript",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        2240,
+        560
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "jsCode": "const buffer = Buffer.from($input.first().json.body.audio, 'base64');\n\nreturn {\n  binary: {\n    audio: {\n      data: buffer.toString('base64'), // n8n Binary 格式要求是 base64\n      mimeType: 'audio/wav',           // 改成你实际的格式，比如 audio/mp3\n      fileName: 'audio.wav'            // 给个文件名\n    }\n  },\n  json: {\n    referenceText: $json.body.referenceText,\n    language: $json.body.language\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        128
+      ],
+      "id": "066aafef-bb20-4031-864c-7e923ce0f2bb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        80,
+        112
+      ],
+      "id": "eaa9340f-7181-45b5-8f38-3bd1affd3724",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=用户输入：{{ $json.data.recognizedText }}\n准确率：{{ $json.data.overall.accuracyScore }}\n韵律得分：{{ $json.data.overall.prosodyScore }}\nALWAYS REPLY USER IN ENGLISH",
+        "options": {
+          "systemMessage": "<role>\nYou are \"Lingo,\" a humorous and facilitative language coach. Your core personality is: **We firmly believe that the ultimate motivation for learning a language is to connect with another soul**. Therefore, your teaching style is bold and practical, and you excel at guiding students to express themselves confidently in various social situations (romantic, professional, or friendly). You love the atmosphere of a café and often use metaphors like painting and technology to make your instruction both concrete and creative.\n</role>\n\n<core_interaction_rule> [Absolute Core Rule]\n1. **Native Speaker Intercept and Guide**: When a user asks you a question or engages in a conversation in Chinese (their native language), you **never** directly answer the content in Chinese.\n2. **Three-Step Teaching Method**: You must strictly follow these steps:\na. **Guidance**: Start by telling the user: \"Hey, this question can be asked in English like this: [provide a standard and authentic English question].\" b. **Request to Try**: Then encourage the user: \"Come on, try asking me again in English.\"\nc. **Response and Explanation**: After the user repeats their question in English (even if imperfectly), answer their question in authentic English. Finally, explain your English answer in Chinese and acknowledge the user's effort.\n\n3. **Personality Stimulation**: You can proactively design challenging tasks related to \"building connections\" (e.g., greetings, compliments, in-depth conversations, conflict resolution), especially incorporating user interests such as painting and technology.\n</core_interaction_rule>\n\n<teaching_style>\n- **Challenge-Driven**: Your lessons consist of individual \"social tasks\" or \"conversational challenges.\"\n- **Dual Difficulty Options**: Each task offers a \"Standard\" version and an \"Expert\" version, allowing users to choose their comfort zone.\n- **Feedback Focus**: When providing feedback, first praise the user's courage and highlights (vocabulary, pronunciation, ideas, etc.), then provide a suggestion for improvement, such as \"If you say it this way, it might come more naturally...\" - **Stay focused**: If small talk deviates from the learning objective, naturally bring it back to the topic by saying, \"By the way, our English challenge...\"\n\n<user_info>\nStudent: Chen Junxu\nInterests: Painting, Technology\nNative Language: Chinese\nTarget Language: English\nCurrent Level: Intermediate (dynamically adjustable)\n</user_info>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        16
+      ],
+      "id": "773332c6-5c28-4fa9-b1d3-1cc33accecb1",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.31.30.231:3000/tts",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"X-API-Key\": \"mykey\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $json.text }}\",\n  \"voice\": \"zh-CN-XiaoxiaoNeural\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        112
+      ],
+      "id": "5abb1e73-7eb8-4ae2-a032-59f6c66c4f98",
+      "name": "tts-service"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 单条输入场景\nconst raw = $input.first().json.output || \"\";\nlet input = raw.replace(/<thinking>[\\s\\S]*?<\\/thinking>\\s*/g, '');\n// 帮你看两种“看得见/看不见”的情况\nconst stringified = JSON.stringify(input);    // 用于查看字符串的 JSON 表示（会显示转义）\nconst hasEscaped = /\\\\n/.test(stringified);   // 文本里是否包含字面 \"\\n\"\nconst hasRealNewline = /\\n/.test(input);      // 文本里是否包含实际换行字符\n\n// 三种处理（按需使用）\n// 1) 删除字面 \\n （把两个字符 \"\\\" + \"n\" 删掉）\nlet cleaned_remove_escaped = input.replace(/\\\\n/g, \"\");\n\n// 2) 把字面 \\n 转成真实的换行\nlet cleaned_convert_to_newline = input.replace(/\\\\n/g, \"\\n\");\n\n// 3) 删除真实的换行（包括 \\r\\n）\nlet cleaned_remove_real = input.replace(/\\r\\n/g, \"\").replace(/\\n/g, \"\");\n\nreturn {\n  json: {\n    original: input,\n    stringified,\n    hasEscaped,\n    hasRealNewline,\n    cleaned_remove_escaped,\n    cleaned_convert_to_newline,\n    cleaned_remove_real\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        112
+      ],
+      "id": "b0123840-4fc0-41d4-af96-dad89ce11ff7",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.31.30.231:3002/speech-to-text",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"X-API-Key\": \"mykey\"\n}\n",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "audio",
+              "inputDataFieldName": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a56a952-c329-4ec2-b9c3-d9e98a620f77",
+      "name": "STT",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -112,
+        0
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node (JavaScript)\nconst inputText = $input.first().json.cleaned_remove_real || \"测试文本\";  \nconst voice = \"zh-CN-XiaoxiaoNeural\";\n\n// 1. 确保文本是字符串\nlet safeText = String(inputText);\n\n// 2. 自动转义双引号，避免 JSON 解析出错\nsafeText = safeText.replace(/\"/g, '\\\\\"');\n\n// 3. 构造 TTS 需要的 JSON\nconst payload = {\n  text: safeText,\n  voice: voice\n};\n\n// 输出给下一个节点（例如 HTTP Request 去调用 Azure TTS）\nreturn [{\n  json: payload\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        112
+      ],
+      "id": "6bbcfae0-1427-422f-8187-465efbc4772a",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2048,
+        544
+      ],
+      "id": "58bbea53-662e-49ff-a62f-b09679137af4",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "model": "amazon.nova-pro-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        352
+      ],
+      "id": "e9469a9c-ac51-4699-93f2-a116c2502e01",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "IFyeSduSbfRHAxXT",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.31.30.231:3011/tts",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=你好"
+            },
+            {
+              "name": "voice",
+              "value": "Zhiyu"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        -112
+      ],
+      "id": "bd6d3272-fcaf-43c1-bf10-daffcc976472",
+      "name": "tts-service1"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        112
+      ],
+      "id": "107dd04d-c87b-4453-b229-992c778ef730",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        -112
+      ],
+      "id": "bf1b4a50-579d-4b2e-a1fe-edcdd8538f24",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://n8n.smart87.me/mcp/9eff9c03-b168-44a6-bd95-5d01f3166cb1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        304
+      ],
+      "id": "ca249a87-0ee5-4113-ad8c-f2aa7590ee70",
+      "name": "MCP Client"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Transcribe with OpenAI": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Webhook containing audio to transcribe": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "STT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Transcribe with OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tts-service": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STT": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "tts-service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook with transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tts-service1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        []
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1bf465b6-a331-4e93-a26f-67a23ad29824",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "103a46b1e16c7dcad7372c67388b5377ecdcf9c2d3cb2af984f129ade87c3692"
+  },
+  "id": "kfWqXEqQid78BGe7",
+  "tags": []
+}

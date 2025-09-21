@@ -1,0 +1,934 @@
+{
+  "name": "Trend",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        496
+      ],
+      "id": "bcbcec13-590b-4bca-bb5c-d7d75e75ac05",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        672
+      ],
+      "id": "b55fc5de-be36-4906-a465-7126b63b81b9",
+      "name": "Merge Results"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "limit": 2,
+        "filters": {
+          "q": "={{ $json.song }}"
+        },
+        "options": {
+          "order": "relevance"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        656
+      ],
+      "id": "f561b257-6a65-4323-ad20-b2b64f4afb65",
+      "name": "Get many videos1",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "PZtFec4qymVwhfAD",
+          "name": "YouTube account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        496
+      ],
+      "id": "822dda6d-5a13-4f92-aa0e-c8a39664c9cf",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "var interest1 = $input.first().json.data.interest1;\nvar interest2 = $input.first().json.data.interest2;\nreturn [\n  { json: { song: interest1 } },\n  { json: { song: interest2 } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -912,
+        496
+      ],
+      "id": "f6807bd3-2f19-4a03-946a-348c8f440d8c",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json }}",
+        "options": {
+          "systemMessage": "你是一名帮助初学者学习中文的助手。\n你的任务是：\n1. 用户会提供几句英文句子。\n2. 你需要从句子中挑选出其中最有学习价值、用户可能感兴趣的5个名词。\n3. 对每个名词，提供：\n    原始英文单词\n    对应的中文翻译\n\n最终输出为 JSON 格式，不要输出任何多余的解释或文字。\n\n推荐的 JSON 格式:\n{\n  \"nouns\": [\n    {\n      \"english\": \"word\",\n      \"chinese\": \"单词\"\n    },\n    {\n      \"english\": \"book\",\n      \"chinese\": \"书\"\n    }\n  ]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        672
+      ],
+      "id": "1ad22929-f4f9-45bc-b558-1af20b6ab469",
+      "name": "AI Agent",
+      "executeOnce": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -208,
+        496
+      ],
+      "id": "4202a4b4-2209-4efb-a837-3b7c0bac129f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "function uuidv4_fallback() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}\n\nconst inItems = $input.all();\nconst out = [];\n\nfor (const item of inItems) {\n  let parsed;\n  try {\n    parsed = (typeof item.json.output === 'string') ? JSON.parse(item.json.output) : item.json.output;\n  } catch (e) {\n    continue;\n  }\n\n  // 如果 parsed 里有 nouns 数组\n  if (parsed && Array.isArray(parsed.nouns)) {\n    const nounsWithId = parsed.nouns.map(n => ({\n      id: uuidv4_fallback(),\n      english: n.english,\n      chinese: n.chinese,\n      createdAt: new Date().toISOString()\n    }));\n\n    out.push({\n      json: {\n        nouns: nounsWithId\n      }\n    });\n  } else if (parsed && parsed.english && parsed.chinese) {\n    // 单个对象情况\n    out.push({\n      json: {\n        nouns: [\n          {\n            id: uuidv4_fallback(),\n            english: parsed.english,\n            chinese: parsed.chinese,\n            createdAt: new Date().toISOString()\n          }\n        ]\n      }\n    });\n  }\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        672
+      ],
+      "id": "f07431f9-1910-4b7c-a635-28832d70c4eb",
+      "name": "to JSON1"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://4bq2yzq5nj.execute-api.ap-southeast-2.amazonaws.com/default/db-write-language",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1392,
+        272
+      ],
+      "id": "9378c8d6-d9c1-497d-8934-d36d698f8eb1",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        320,
+        1056
+      ],
+      "id": "0d40c6d2-ea81-4ecc-bb0f-0b552444767d",
+      "name": "Merge Results1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        896
+      ],
+      "id": "2530f1f4-3e4d-4926-a021-dbd5941a2475",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -208,
+        896
+      ],
+      "id": "a1e36d1c-ed7f-4580-acfd-11bbdf247128",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"most-trending\": {\n\n    \"#1\": { \n\n      \"query\":\"{{ $json.related_queries.rising[0].query }}\",\n      \"score\":\"{{ $json.related_queries.rising[0].extracted_value }}\"\n\n    },\n\n\n    \"#2\": { \n\n      \"query\":\"{{ $json.related_queries.rising[1].query }}\",\n      \"score\":\"{{ $json.related_queries.rising[1].extracted_value }}\"\n\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "cc4362f5-2d4b-4bf6-be5c-dd4d8ba0bc01",
+      "name": "2 Most Trending1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -176,
+        1072
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.song }}"
+            },
+            {
+              "name": "geo",
+              "value": "MY"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "date",
+              "value": "={{ $now.minus({ days: 3 }).format('yyyy-MM-dd') }} {{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "data_type",
+              "value": "RELATED_QUERIES"
+            },
+            {
+              "name": "engine",
+              "value": "google_trends"
+            },
+            {
+              "name": "api_key",
+              "value": "73f45e04ca45b859a8c547b2ce69205e2ed519ac0d0bc4d9fa9614f6b4cce3e8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cca98a5d-ccb8-4c36-a6bb-fa2475d46074",
+      "name": "Google Trends1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -400,
+        1072
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the top array from your JSON\nconst topItems = $('Google Trends1').first().json.related_queries.top;\n\n// Filter the items to only include those with extracted_value > 30\nconst filtered = topItems.filter(item => item.extracted_value > 30);\n\n// Map the filtered items to their query values and join them with commas\nconst resultString = filtered.map(item => item.query).join(', ');\n\n// Return the result in a new JSON property\nreturn [{ json: { result: resultString } }];\n"
+      },
+      "id": "d0ece9bf-6ee9-419d-b174-833c385d873c",
+      "name": "High search volume keywords1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        48,
+        1072
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 假设 Merge 节点的名字叫 \"Merge Results\"\n// 本节点接在 Merge 之后\n\n// 取得所有输入 items\nconst allItems = $input.all();\n\n// 提取每个视频的 title + description\nconst texts = allItems.map(item => {\n  const title = item.json.snippet?.title ?? \"\";\n  const description = item.json.snippet?.description ?? \"\";\n  return `Title: ${title}\\nDescription: ${description}`;\n});\n\n// 拼成一个字符串，比如用两个换行分隔每个视频\nconst combinedText = texts.join(\"\\n\\n\");\n\n// 返回一个 item，带上这个拼好的字符串\nreturn [\n  {\n    json: {\n      query: combinedText\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        496
+      ],
+      "id": "f90d489e-69a2-4a8f-b48a-066e9858dbab",
+      "name": "Query from Youtube"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得所有输入 items\nconst allItems = $input.all();\n\n// 提取每个 result 字段\nconst texts = allItems.map(item => item.json.result ?? \"\");\n\n// 拼成一个字符串，比如用两个换行分隔\nconst combinedText = texts.join(\"\\n\\n\");\n\n// 返回一个 item，带上拼好的字符串\nreturn [\n  {\n    json: {\n      query: combinedText\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        896
+      ],
+      "id": "65404651-5b03-497b-90da-cbd8f2f6999a",
+      "name": "Query from Google Trends"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        288,
+        672
+      ],
+      "id": "8b49beb3-034f-445e-a560-61ce96704af8",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nconst texts = allItems.map(item => {\n  const query = item.json.query ?? \"\";  // 直接取 query\n  return query;\n});\n\nconst combinedText = texts.join(\"\\n\\n\");  // 或者用 \"\\n\\n\" 根据需求\n\nreturn [\n  {\n    json: {\n      answer: combinedText\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        672
+      ],
+      "id": "fb0fc49f-6b22-4508-bbca-5d1a3441859a",
+      "name": "Query from Youtube1"
+    },
+    {
+      "parameters": {
+        "model": "meta.llama3-70b-instruct-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        848
+      ],
+      "id": "b0aedf8e-19ce-496b-bfaf-a5820e2e072c",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "IFyeSduSbfRHAxXT",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/user-preferences/{{ $json.data.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1088,
+        496
+      ],
+      "id": "f232022b-afd3-4e11-98f3-f15bed4110a7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/profile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1360,
+        496
+      ],
+      "id": "26cf3497-bece-405f-972e-4fe02ae7f2a0",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005{{ $json.body.endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body.data }}",
+        "options": {}
+      },
+      "id": "a61d3f0a-9a6e-4d19-b3d1-65b0015ac155",
+      "name": "POST",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1600,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取输入数据\nconst data = items[0].json;  \n\n// 提取 nouns 数组\nconst nouns = data.nouns || [];\n\n// 把每个 noun 包装成 n8n item\nreturn nouns.map(n => ({ json: n }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        672
+      ],
+      "id": "b573f709-3557-4b60-bb32-ecc649ca7601",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/words",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "1136b5b5-1363-463e-9497-31de0f48f873",
+      "name": "POST3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2320,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2064,
+        672
+      ],
+      "id": "d66dff86-71b1-4525-9e28-e4cb4edcbf63",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function 节点\n// 说明：兼容三种常见情况：\n// A. 上游已经输出多个 items（每个 item.json 就是一个 noun）\n// B. 上游只输出一个 item，且 item.json 本身就是一个数组 ([{...},{...}])\n// C. 上游只输出一个 item，且 item.json.nouns 是数组 ({ nouns: [...] })\n\nconst userId = $('HTTP Request2').first().json.data.id; // <- 改成你要的 users_id，或下面示例里从其他节点取\n\n// 情况 A：如果上游已经是多个 item\nif (items.length > 1) {\n  return items.map(it => ({ json: { ...it.json, users_id: userId } }));\n}\n\n// 情况 B：items[0].json 本身就是数组\nif (Array.isArray(items[0].json)) {\n  return items[0].json.map(n => ({ json: { ...n, users_id: userId } }));\n}\n\n// 情况 C：items[0].json.nouns 是数组\nif (Array.isArray(items[0].json?.nouns)) {\n  return items[0].json.nouns.map(n => ({ json: { ...n, users_id: userId } }));\n}\n\n// 兜底：把第一个 item 加上 users_id 并返回单一 item\nreturn [{ json: { ...(items[0].json || {}), users_id: userId } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        672
+      ],
+      "id": "4d4758e3-ec87-4ed8-925d-c4478895c6d1",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 输入 items 是多个对象，每个对象有旧字段\nreturn items.map(item => {\n  const old = item.json;\n\n  return {\n    json: {\n      words_id: old.id,             // 原来的 id -> words_id\n      native_word: old.english,     // english -> native_word\n      target_word: old.chinese,     // chinese -> target_word\n      timestamp: old.createdAt,     // createdAt -> timestamp\n      users_id: old.users_id        // users_id 保持不变\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        672
+      ],
+      "id": "d45fbd07-77d1-439f-8e08-4dae3d03e402",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "bc35SH5j2ueh7NcZ",
+          "mode": "list",
+          "cachedResultName": "TextFlow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        512
+      ],
+      "id": "0f7a087a-d617-452e-ba5f-218fbea385b6",
+      "name": "Call 'TextFlow'"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://172.31.30.231:3005/api/chat-histories",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "a707ec3c-5908-445c-91d3-c08d6ac4a449",
+      "name": "POST4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1328,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/user-statistics/{{ $json.data.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2528,
+        608
+      ],
+      "id": "9c82f285-24d8-4ad5-b1aa-ee96ab60534e",
+      "name": "Get Cache Statistics"
+    },
+    {
+      "parameters": {
+        "content": "有望衔接"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        448
+      ],
+      "typeVersion": 1,
+      "id": "598f0eda-3d54-427f-9727-37c9814f38ec",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "=http://172.31.30.231:3005/api/profile",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2288,
+        608
+      ],
+      "id": "af42cd12-0375-4f65-9951-59dcc6903425",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://172.31.30.231:3005/api/user-statistics/{{ $json.data.users_id }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "id": "4980695c-2242-4964-84c7-0bdacc18aead",
+      "name": "Update Statistics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2976,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const old = item.json;\n\n  return {\n    json: {\n      ...old,\n      data: {\n        ...old.data,\n        words_learned: (old.data.words_learned || 0) + 3\n      }\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2736,
+        608
+      ],
+      "id": "985859c9-05ae-4332-9e44-ceb99c4bb22e",
+      "name": "Code in JavaScript4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many videos1": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many videos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Query from Youtube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "to JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "to JSON1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Trends1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Query from Google Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2 Most Trending1": {
+      "main": [
+        [
+          {
+            "node": "High search volume keywords1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Trends1": {
+      "main": [
+        [
+          {
+            "node": "2 Most Trending1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High search volume keywords1": {
+      "main": [
+        [
+          {
+            "node": "Merge Results1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Query from Youtube": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query from Google Trends": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Query from Youtube1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query from Youtube1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "POST3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'TextFlow'": {
+      "main": [
+        [
+          {
+            "node": "POST4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Get Cache Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cache Statistics": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Update Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e7c6ad7a-aeee-46a6-b2d1-f8d05624cb3a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "103a46b1e16c7dcad7372c67388b5377ecdcf9c2d3cb2af984f129ade87c3692"
+  },
+  "id": "vdfrlOgnc69pekxY",
+  "tags": []
+}

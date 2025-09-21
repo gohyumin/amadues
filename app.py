@@ -1,3 +1,5 @@
+
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
 import os
 import re
@@ -358,7 +360,7 @@ def analyze_pronunciation_accuracy(audio_file, target_language, user_level):
         import base64
         
         # 准备发送到发音评估API的数据
-        api_url = "https://n8n.smart87.me/webhook/pronunciation-assessment"
+        api_url = "https://n8n.smart87.me/webhook-test/pronunciation-assessment"
         
         print(f"🎤 开始处理音频文件...")
         
@@ -723,6 +725,42 @@ def upload_audio_to_s3(audio_file, user_id, is_bot_audio=False):
         traceback.print_exc()
         return None
 
+@app.route("/api/words", methods=["POST"])
+def words_storage_proxy():
+    """
+    统一POST代理，前端传 {endpoint, method, data}，后端直接转发到 n8n storage-service
+    """
+    try:
+        data = request.get_json(force=True)
+        endpoint = data.get("endpoint", "")
+        # 如果 endpoint 以 /webhook-test/ 开头，则直接拼接，否则用默认 webhook
+        if endpoint and endpoint.startswith("/webhook-test/"):
+            api_url = f"https://n8n.smart87.me{endpoint}"
+        else:
+            api_url = "https://n8n.smart87.me/webhook/storage-service"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "endpoint": endpoint,
+            "method": data.get("method", "GET"),
+            "data": data.get("data", {})
+        }
+        resp = requests.post(api_url, headers=headers, json=payload, timeout=10)
+        resp.raise_for_status()
+        result = resp.json()
+        # 兼容 demo_fixed.html 的风格
+        if isinstance(result, dict) and ("words" in result or "data" in result):
+            words = result.get("words") or result.get("data")
+            return jsonify({"success": True, "words": words})
+        elif isinstance(result, list):
+            return jsonify({"success": True, "words": result})
+        else:
+            return jsonify({"success": True, "words": result})
+    except Exception as e:
+        print(f"❌ words_storage_proxy失败:{str(e)}")
+        return jsonify({"success": False, "error": str(e), "words": []}), 500
+
+## GET 路由已移除，所有 /api/words 请求统一 POST 代理
+    
 def save_chat_message_to_dynamodb(users_id, sender, message_content, message_type="text", audio_url=None, pronunciation_assessment=None):
     """
     保存聊天消息到DynamoDB
@@ -875,8 +913,14 @@ def home():
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.form.get("email", "").strip()
-    password = request.form.get("password", "")
+    # 支持 form-data 和 JSON 两种方式
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        email = (data.get("email") or "").strip()
+        password = data.get("password", "")
+    else:
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
     if not email or not password:
         flash("Email and password are required.", "danger")
         return redirect(url_for("register_page", tab="login"))
@@ -891,6 +935,14 @@ def login():
             session["user_id"] = user.get("id")
             session["username"] = user.get("username")
             session["email"] = user.get("email")
+
+            # 登录成功后，POST email 到 n8n webhook
+            try:
+                webhook_url = "https://n8n.smart87.me/webhook-test/user-startup"
+                requests.post(webhook_url, json={"email": email}, timeout=5)
+                print(f"✅ 已将 email POST 到 n8n webhook: {email}")
+            except Exception as e:
+                print(f"⚠️ n8n webhook POST 失败: {e}")
         else:
             flash("Invalid email or password.", "danger")
             return redirect(url_for("register_page", tab="login"))
@@ -1549,19 +1601,41 @@ def chatbot_message_audio():
                     }
                     formatted_words.append(formatted_word)
         
-        # 返回响应
-        return jsonify({
-            "reply": chatbot_response,
-            "transcript": display_transcript,  # 使用处理后的转录文本
-            "pronunciation_score": pronunciation_result.get('pronunciation_score', 0),
-            "accuracy_score": pronunciation_result.get('accuracy_score', 0),
-            "fluency_score": pronunciation_result.get('fluency_score', 0),
-            "words_analysis": formatted_words,  # 添加格式化后的单词分析
-            "reference_text": pronunciation_result.get('reference_text', ''),  # 参考文本
-            "recognized_text": pronunciation_result.get('transcript', display_transcript),  # 识别文本
-            "user_audio_url": user_audio_s3_url,  # 添加S3音频URL
-            "tts_url": None  # TTS URL（如果有的话）
-        })
+        # 获取 webhook TTS base64（假设 pronunciation_result['api_response'] 是 webhook返回的数组）
+        tts_base64 = None
+        webhook_api = pronunciation_result.get('api_response', [])
+        if isinstance(webhook_api, list) and len(webhook_api) > 0:
+            tts_base64 = webhook_api[0].get('data') if isinstance(webhook_api[0], dict) else None
+        # 组装 response 数组
+        response_list = [
+            {
+                "data": tts_base64
+            },
+            {
+                "text": chatbot_response,
+                "voice": "zh-CN-XiaoxiaoNeural"
+            },
+            {
+                "success": True,
+                "data": {
+                    "overall": {
+                        "pronunciationScore": pronunciation_result.get('pronunciation_score', 0),
+                        "accuracyScore": pronunciation_result.get('accuracy_score', 0),
+                        "completenessScore": pronunciation_result.get('completeness_score', None),
+                        "fluencyScore": pronunciation_result.get('fluency_score', 0),
+                        "prosodyScore": pronunciation_result.get('prosody_score', None)
+                    },
+                    "words": formatted_words,
+                    "recognizedText": pronunciation_result.get('transcript', display_transcript),
+                    "referenceText": pronunciation_result.get('reference_text', ''),
+                    "language": json_data.get('language', 'zh-CN'),
+                    "timestamp": str(int(time.time() * 1000))
+                },
+                "processingTime": "600ms",
+                "timestamp": str(int(time.time() * 1000))
+            }
+        ]
+        return jsonify(response_list)
         
     except Exception as e:
         print(f"❌ 语音聊天处理错误: {str(e)}")
@@ -1699,6 +1773,40 @@ def test_connections():
     
     return jsonify(results)
 
+@app.route("/api/dashboard", methods=["POST"])
+def dashboard_storage_proxy():
+    """
+    统一POST代理，前端传 {endpoint, method, data}，后端直接转发到 n8n storage-service
+    """
+    try:
+        data = request.get_json(force=True)
+        endpoint = data.get("endpoint", "")
+        # 可根据实际情况调整dashboard的n8n webhook
+        if endpoint and endpoint.startswith("/webhook-test/"):
+            api_url = f"https://n8n.smart87.me{endpoint}"
+        else:
+            api_url = "https://n8n.smart87.me/webhook-test/storage-service"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "endpoint": endpoint,
+            "method": data.get("method", "GET"),
+            "data": data.get("data", {})
+        }
+        resp = requests.post(api_url, headers=headers, json=payload, timeout=10)
+        resp.raise_for_status()
+        result = resp.json()
+        # 兼容 dashboard 数据结构
+        if isinstance(result, dict) and ("dashboard" in result or "data" in result):
+            dashboard_data = result.get("dashboard") or result.get("data")
+            return jsonify({"success": True, "dashboard": dashboard_data})
+        elif isinstance(result, list):
+            return jsonify({"success": True, "dashboard": result})
+        else:
+            return jsonify({"success": True, "dashboard": result})
+    except Exception as e:
+        print(f"❌ dashboard_storage_proxy失败:{str(e)}")
+        return jsonify({"success": False, "error": str(e), "dashboard": []}), 500
+    
 @app.route("/api/debug/view-chatbot-logs", methods=["GET"])
 def view_all_chatbot_logs():
     """
@@ -2069,7 +2177,7 @@ def log_selection():
         }
         
         # Send to n8n webhook for learning content
-        webhook_url = "https://n8n.smart87.me/webhook/related-item"
+        webhook_url = "https://n8n.smart87.me/webhook-test/related-item"
         try:
             response = requests.post(
                 webhook_url,

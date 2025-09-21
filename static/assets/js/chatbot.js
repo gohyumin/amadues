@@ -218,7 +218,7 @@
     // 如果有参考文本且与识别文本不同，也显示出来
     if (referenceText && referenceText !== recognizedText) {
       analysisHtml += '<div style="margin-top: 8px; font-size: 12px; color: #6c757d;">';
-      analysisHtml += '<strong>参考文本:</strong> ' + referenceText;
+      analysisHtml += '<strong>Reference Text:</strong> ' + referenceText;
       analysisHtml += '</div>';
     }
     
