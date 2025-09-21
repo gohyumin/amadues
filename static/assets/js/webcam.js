@@ -1,3 +1,4 @@
+
 // Webcam Module - Real-time Vocabulary Discovery
 window.WebcamModule = window.WebcamModule || class WebcamModule {
   constructor() {
