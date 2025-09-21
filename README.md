@@ -87,37 +87,6 @@ LinguaDaily is a comprehensive language learning platform that combines computer
 - **Authentication**: AWS IAM and credential management
 - **Storage**: Multi-region S3 buckets with CDN
 
-## 📋 API Endpoints
-
-### **Main Flask Application**
-
-GET / # Home page
-POST /login # User authentication
-POST /register # User registration
-GET /dashboard # User dashboard
-GET /webcam # Main learning interface
-POST /log-selection # Log selected objects for learning
-GET /get-detections # Get current object detections
-POST /api/checkin # Daily learning check-in
-GET /api/checkin-stats # Learning analytics
-
-### **STT Service (Port 3010)**
-
-POST /speech-to-text # Single audio transcription
-POST /batch-speech-to-text # Batch audio processing
-GET /health # Service health check
-
-### **Pronunciation Service (Port 3001)**
-
-POST /pronunciation-assessment # Audio pronunciation scoring
-GET /languages # Supported languages
-GET /docs # API documentation
-
-### **TTS Service (Port 3011)**
-
-POST /tts # Text-to-speech conversion
-GET /health # Service health check
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -140,26 +109,28 @@ GET /health # Service health check
    pip install -r requirements.txt
 
 4. **Configure environment variables**
-   AWS Configuration
-   export AWS_ACCESS_KEY_ID="your_access_key"
-   export AWS_SECRET_ACCESS_KEY="your_secret_key"
-   export AWS_REGION="ap-southeast-1"
 
-   API Security
-   export API_KEY="your_secure_api_key"
+   - AWS Configuration
+   - export AWS_ACCESS_KEY_ID="your_access_key"
+   - export AWS_SECRET_ACCESS_KEY="your_secret_key"
+   - export AWS_REGION="ap-southeast-1"
+
+   - API Security
+   - export API_KEY="your_secure_api_key"
 
 5. **Start the services**
-   Main Flask application
-   python app.py
 
-STT Service
-node server.js # (Port 3010)
+   - Main Flask application
+   - python app.py
 
-Pronunciation Service
-node server.js # (Port 3001)
+   - STT Service
+   - node server.js # (Port 3010)
 
-TTS Service
-node index.js # (Port 3011)
+   - Pronunciation Service
+   - node server.js # (Port 3001)
+
+   - TTS Service
+   - node index.js # (Port 3011)
 
 ## 📊 Learning Features
 
