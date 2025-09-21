@@ -281,7 +281,7 @@
                 console.log('Response status:', webhookResponse.status);
                 console.log('Response headers:', Object.fromEntries(webhookResponse.headers.entries()));
 
-                if (!webhookResponse.ok) {
+                 if (!webhookResponse.ok) {
                     const errorText = await webhookResponse.text();
                     console.error('Server response:', errorText);
                     throw new Error(`HTTP error! status: ${webhookResponse.status}, response: ${errorText}`);
@@ -289,6 +289,11 @@
 
                 const result = await webhookResponse.json();
                 console.log("Webhook response:", result);
+
+                // Display the complete JSON response for full visibility
+                let displayText = '=== 完整 API 响应 ===\n';
+                displayText += JSON.stringify(result, null, 2);
+                displayText += '\n\n';
 
                 // The response is an array with multiple objects
                 // Find the object with speech assessment data (has 'success' and 'data' fields)
@@ -310,8 +315,8 @@
                 const actualData = speechAssessmentResponse.data;
                 console.log("Found speech assessment data:", actualData);
 
-                // Process the complete JSON response
-                let displayText = '';
+                // Add formatted summary after the raw JSON
+                displayText += '=== 格式化摘要 ===\n';
                 
                 // Handle transcript text (main content)
                 const transcriptText = actualData.recognizedText || 'No transcript received.';
@@ -326,94 +331,82 @@
                 
                 // Add TTS text response if available
                 if (textResponse && textResponse.text) {
-                    displayText += `=== AI 反馈 ===\n`;
-                    displayText += `${textResponse.text}\n\n`;
+                    displayText += `AI 反馈: ${textResponse.text}\n\n`;
                 }
                 
                 // Handle overall scores from the 'overall' object
                 if (actualData.overall) {
                     const overall = actualData.overall;
-                    displayText += `=== 综合评分 ===\n`;
+                    displayText += `综合评分: `;
                     
+                    const scores = [];
                     if (overall.pronunciationScore !== undefined && overall.pronunciationScore !== null) {
-                        displayText += `发音得分: ${overall.pronunciationScore}\n`;
+                        scores.push(`发音: ${overall.pronunciationScore}`);
                     }
-                    
                     if (overall.accuracyScore !== undefined && overall.accuracyScore !== null) {
-                        displayText += `准确度: ${overall.accuracyScore}\n`;
+                        scores.push(`准确度: ${overall.accuracyScore}`);
                     }
-                    
                     if (overall.completenessScore !== undefined && overall.completenessScore !== null) {
-                        displayText += `完整度: ${overall.completenessScore}\n`;
+                        scores.push(`完整度: ${overall.completenessScore}`);
                     }
-                    
                     if (overall.fluencyScore !== undefined && overall.fluencyScore !== null) {
-                        displayText += `流利度: ${overall.fluencyScore}\n`;
+                        scores.push(`流利度: ${overall.fluencyScore}`);
                     }
-                    
                     if (overall.prosodyScore !== undefined && overall.prosodyScore !== null) {
-                        displayText += `韵律得分: ${overall.prosodyScore}\n`;
+                        scores.push(`韵律: ${overall.prosodyScore}`);
                     }
                     
-                    displayText += '\n';
+                    displayText += scores.join(', ') + '\n\n';
                 }
                 
                 // Add word-level details if available
                 if (actualData.words && Array.isArray(actualData.words)) {
-                    displayText += `=== 词汇详情 (${actualData.words.length}个词) ===\n`;
-                    actualData.words.forEach((word) => {
+                    displayText += `词汇详情 (${actualData.words.length}个词): `;
+                    const wordsSummary = actualData.words.map((word) => {
                         const wordText = word.word || '';
                         const accuracy = word.accuracyScore || 'N/A';
                         const errorType = word.errorType || '';
-                        const errorTypeEn = word.errorTypeEn || '';
-                        const index = word.index || '';
                         
-                        displayText += `${index}. ${wordText}`;
-                        
+                        let wordInfo = wordText;
                         if (accuracy !== 'N/A') {
-                            displayText += ` - 准确度: ${accuracy}`;
+                            wordInfo += `(${accuracy})`;
                         }
-                        
                         if (errorType && errorType !== '正确' && errorType !== 'None') {
-                            displayText += ` (${errorType}`;
-                            if (errorTypeEn && errorTypeEn !== errorType) {
-                                displayText += ` / ${errorTypeEn}`;
-                            }
-                            displayText += ')';
+                            wordInfo += `[${errorType}]`;
                         }
-                        displayText += '\n';
+                        return wordInfo;
                     });
-                    displayText += '\n';
+                    displayText += wordsSummary.join(', ') + '\n\n';
                 }
                 
-                // Add timing information if available
+                // Add additional information
+                const additionalInfo = [];
                 if (speechAssessmentResponse.processingTime) {
-                    displayText += `处理时间: ${speechAssessmentResponse.processingTime}\n`;
+                    additionalInfo.push(`处理时间: ${speechAssessmentResponse.processingTime}`);
                 }
-                
                 if (actualData.timestamp) {
-                    displayText += `时间戳: ${actualData.timestamp}\n`;
+                    additionalInfo.push(`时间戳: ${actualData.timestamp}`);
                 }
-                
                 if (actualData.language) {
-                    displayText += `语言: ${actualData.language}\n`;
+                    additionalInfo.push(`语言: ${actualData.language}`);
                 }
-                
-                // Add success status if available
                 if (speechAssessmentResponse.success !== undefined) {
-                    displayText += `\n处理状态: ${speechAssessmentResponse.success ? '成功' : '失败'}\n`;
+                    additionalInfo.push(`状态: ${speechAssessmentResponse.success ? '成功' : '失败'}`);
                 }
-                
-                // Add voice information if available
                 if (textResponse && textResponse.voice) {
-                    displayText += `语音合成: ${textResponse.voice}\n`;
+                    additionalInfo.push(`语音: ${textResponse.voice}`);
                 }
                 
-                // Display the formatted result
+                if (additionalInfo.length > 0) {
+                    displayText += additionalInfo.join(' | ') + '\n';
+                }
+                
+                // Display the complete result
                 transcriptInput.value = displayText;
                 
                 // Log detailed information to console
                 console.log('Parsed response data:', {
+                    fullResponse: result,
                     transcript: transcriptText,
                     hasOverallScores: !!actualData.overall,
                     hasWords: !!(actualData.words && Array.isArray(actualData.words)),

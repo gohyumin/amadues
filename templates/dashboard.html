@@ -21,6 +21,7 @@
   <link href="{{ url_for('static', filename='assets/css/exercise.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='assets/css/quiz.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='assets/css/webcam.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/words.css') }}" rel="stylesheet">
   
   <!-- Chart.js for data visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -70,6 +71,9 @@
           </button>
           <button class="menu-item" data-target="webcam">
             <i class="bi bi-camera-video"></i>Webcam
+          </button>
+          <button class="menu-item" data-target="words">
+            <i class="bi bi-book"></i>Words
           </button>
           <button class="menu-item" data-target="settings">
             <i class="bi bi-gear"></i>Settings
@@ -265,6 +269,15 @@
             {% include 'partials/webcam_section.html' %}
           </div>
         </div>
+          <div id="panel-words" class="panel">
+            <div class="panel-container">
+              <div class="dash-hero">
+                <h1>Words</h1>
+                <p>happy words happy day</p>
+              </div>
+              {% include 'partials/words_section.html' %}
+            </div>
+          </div>
         <div id="panel-settings" class="panel">
           <div class="panel-container dashboard-section">
             <div class="dash-hero"><h1>Settings</h1><p>Manage your profile and preferences.</p></div>
@@ -280,6 +293,7 @@
   <script src="{{ url_for('static', filename='assets/js/chatbot.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/exercise.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/quiz.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/words.js') }}"></script>
   
   <!-- Preload module JavaScript to avoid loading delays -->
 </body>

@@ -256,38 +256,42 @@
     var isBot = (role !== 'user');
     var container = document.createElement('div');
     if (isBot) {
-      container.className = 'msg-row';
+      container.className = 'msg-row bot-reply-row';
       var avatarWrap = document.createElement('div');
       avatarWrap.className = 'avatar';
       var img = document.createElement('img');
       var botAvatar = document.querySelector('.chat-container')?.getAttribute('data-bot-avatar');
       if (botAvatar) img.src = botAvatar;
       avatarWrap.appendChild(img);
+
       var bubble = document.createElement('div');
-      bubble.className = 'msg bot';
+      bubble.className = 'msg bot bot-reply-bubble';
+
       if (audioUrl) {
-        var wrap = document.createElement('div');
-        wrap.className = 'audio-bubble';
+        // 语音在上方
+        var audioWrap = document.createElement('div');
+        audioWrap.className = 'audio-bubble bot-audio-bubble';
         var audio = document.createElement('audio');
         audio.controls = true;
-        audio.src = audioUrl;
-        wrap.appendChild(audio);
-        if (text) {
-          var caption = document.createElement('div');
-          caption.textContent = text;
-          wrap.appendChild(caption);
-        }
-        bubble.appendChild(wrap);
-      } else {
-        // 检查是否是机器人分析报告（包含特定标记）
-        if (text && text.includes('🤖 **机器人分析报告**')) {
-          // 格式化机器人分析报告
-          bubble.innerHTML = formatBotAnalysisReport(text);
-          bubble.classList.add('analysis-report');
+        // 兼容 TTS base64 wav 播放
+        if (audioUrl.startsWith('data:audio/wav;base64,')) {
+          audio.src = audioUrl.replace('data:audio/wav;base64,', 'data:audio/x-wav;base64,');
         } else {
-          bubble.textContent = text;
+          audio.src = audioUrl;
         }
+        console.log('机器人语音 audio.src:', audio.src.slice(0, 80));
+        audioWrap.appendChild(audio);
+        bubble.appendChild(audioWrap);
       }
+
+      // 文本在下方
+      if (text) {
+        var textDiv = document.createElement('div');
+        textDiv.className = 'bot-reply-text';
+        textDiv.textContent = text;
+        bubble.appendChild(textDiv);
+      }
+
       container.appendChild(avatarWrap);
       container.appendChild(bubble);
       chatLog.appendChild(container);
@@ -385,8 +389,56 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: text })
     }).then(function(r){ return r.json(); }).then(function(res){
-      appendMessage(res.reply || '...');
-      isProcessingText = false;
+        // 通用调试输出，完整打印每个响应对象内容
+        if (Array.isArray(res)) {
+          res.forEach(function(item, idx) {
+            console.log('Response item', idx, ':', item);
+            if (item.data && typeof item.data === 'string') {
+              console.log('Base64 data found at index', idx, ':', item.data);
+            } else if (item.data && typeof item.data === 'object' && item.data !== null) {
+              Object.keys(item.data).forEach(function(key) {
+                if (typeof item.data[key] === 'string' && item.data[key].match(/^[A-Za-z0-9+/=]+$/)) {
+                  console.log('Base64 data found in object at index', idx, 'key', key, ':', item.data[key]);
+                }
+              });
+            }
+          });
+        } else {
+          console.log('Response:', res);
+          if (res.data && typeof res.data === 'string') {
+            console.log('Base64 data found:', res.data);
+          } else if (res.data && typeof res.data === 'object' && res.data !== null) {
+            Object.keys(res.data).forEach(function(key) {
+              if (typeof res.data[key] === 'string' && res.data[key].match(/^[A-Za-z0-9+/=]+$/)) {
+                console.log('Base64 data found in key', key, ':', res.data[key]);
+              }
+            });
+          }
+        }
+        // 检查并输出 base64 数据
+        if (Array.isArray(res)) {
+          res.forEach(function(item, idx) {
+            if (item.data && typeof item.data === 'string') {
+              console.log('Base64 data found at index', idx, ':', item.data);
+            } else if (item.data && typeof item.data === 'object' && item.data !== null) {
+              Object.keys(item.data).forEach(function(key) {
+                if (typeof item.data[key] === 'string' && item.data[key].match(/^[A-Za-z0-9+/=]+$/)) {
+                  console.log('Base64 data found in object at index', idx, 'key', key, ':', item.data[key]);
+                }
+              });
+            }
+          });
+        } else if (res.data && typeof res.data === 'string') {
+          console.log('Base64 data found:', res.data);
+        } else if (res.data && typeof res.data === 'object' && res.data !== null) {
+          Object.keys(res.data).forEach(function(key) {
+            if (typeof res.data[key] === 'string' && res.data[key].match(/^[A-Za-z0-9+/=]+$/)) {
+              console.log('Base64 data found in key', key, ':', res.data[key]);
+            }
+          });
+        }
+        appendMessage(res.reply || '...');
+        isProcessingText = false;
     }).catch(function(){ 
       appendMessage('Failed to reach server.'); 
       isProcessingText = false;
@@ -452,26 +504,21 @@
         // 使用与frontend.html相同的方式：转换为base64并发送JSON
         console.log('🔄 转换音频为base64...');
         blob.arrayBuffer().then(function(arrayBuffer) {
-          // 转换为base64（与frontend.html相同的方法）
+          // 转换为base64（与frontend.html完全一致）
           var bytes = new Uint8Array(arrayBuffer);
           var binaryString = '';
           for (var i = 0; i < bytes.length; i++) {
             binaryString += String.fromCharCode(bytes[i]);
           }
           var base64Audio = btoa(binaryString);
-          
           console.log('📊 Base64编码长度:', base64Audio.length);
-          
-          // 准备JSON负载（与frontend.html相同的格式）
+          // 与 frontend.html 保持一致的 payload
           var payload = {
             audio: base64Audio,
-            referenceText: "各个国家有各个国家的国歌",  // 使用相同的参考文本
-            language: "zh-CN"  // 使用相同的语言设置
+            referenceText: "各个国家有各个国家的国歌",
+            language: "zh-CN"
           };
-          
           console.log('📤 发送JSON数据到服务器...');
-          
-          // 发送JSON数据而不是FormData
           return fetch('/api/chatbot/message-audio', {
             method: 'POST',
             headers: {
@@ -479,13 +526,43 @@
             },
             body: JSON.stringify(payload)
           });
-        }).then(function(r){ 
+        }).then(function(r){
           console.log('📥 服务器响应状态:', r.status);
-          return r.json(); 
+          return r.json();
         }).then(function(res){
           console.log('✅ 服务器响应数据:', res);
-          
-          // 提取语音分析数据
+          console.log('🟢 后端完整响应:', res);
+
+          // 新格式：数组 [base64, text, 评估]
+          if (Array.isArray(res) && res.length >= 3) {
+            // 用户音频消息
+            var userAudioUrl = localUrl;
+            var speechAnalysisData = res[2].data || {};
+            // 重新显示用户音频消息（带分析）
+            appendMessage(speechAnalysisData.recognizedText || speechAnalysisData.transcript || '', 'user', userAudioUrl, {
+              recognizedText: speechAnalysisData.recognizedText,
+              referenceText: speechAnalysisData.referenceText,
+              wordsAnalysis: speechAnalysisData.words,
+              pronunciationScore: speechAnalysisData.overall?.pronunciationScore,
+              accuracyScore: speechAnalysisData.overall?.accuracyScore,
+              fluencyScore: speechAnalysisData.overall?.fluencyScore
+            });
+
+            // system语音回复
+            var base64Audio = res[0].data;
+            var botText = res[1].text;
+            if (base64Audio) {
+              // 与 frontend.html 保持一致，拼接 audio src
+              var botAudioUrl = "data:audio/wav;base64," + base64Audio;
+              appendMessage(botText, 'bot', botAudioUrl);
+            } else {
+              appendMessage(botText, 'bot');
+            }
+            isProcessingAudio = false;
+            return;
+          }
+
+          // 兼容旧格式
           var speechAnalysisData = {
             transcript: res.transcript || '',
             recognizedText: res.recognized_text || res.transcript || '',
@@ -495,32 +572,22 @@
             accuracyScore: res.accuracy_score || 0,
             fluencyScore: res.fluency_score || 0
           };
-          
           console.log('🎯 语音分析数据:', speechAnalysisData);
-          
-          // 更新用户消息，移除旧的并添加带分析数据的新消息
           var lastUserMsg = chatLog.querySelector('.msg.user:last-of-type');
           if (lastUserMsg && lastUserMsg.parentNode) {
             lastUserMsg.parentNode.removeChild(lastUserMsg);
           }
-          
-          // 使用服务器返回的S3 URL而不是localUrl
-          var audioUrlToUse = res.user_audio_url || localUrl; // 优先使用S3 URL
+          var audioUrlToUse = res.user_audio_url || localUrl;
           console.log('🎵 使用的音频URL:', audioUrlToUse);
           console.log('🎵 是否为S3 URL:', audioUrlToUse && audioUrlToUse.includes('s3.'));
-          
-          // 重新显示用户音频消息，这次包含语音分析数据和S3 URL
           appendMessage(speechAnalysisData.transcript, 'user', audioUrlToUse, speechAnalysisData);
-          
-          // 显示机器人回复
           var replyText = res.reply || speechAnalysisData.transcript || '...';
           appendMessage(replyText, 'bot', res.tts_url);
-          
-          isProcessingAudio = false; // 重置标志
-        }).catch(function(err){ 
+          isProcessingAudio = false;
+        }).catch(function(err){
           console.error('❌ 音频处理失败:', err);
-          appendMessage('Failed to process audio.'); 
-          isProcessingAudio = false; // 重置标志
+          appendMessage('Failed to process audio.');
+          isProcessingAudio = false;
         });
       });
       
