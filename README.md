@@ -45,7 +45,7 @@ LinguaDaily is a comprehensive language learning platform that combines computer
 
 - **Main Application**: Flask-based web server with user management
 - **STT Service** (Port 3010): AWS Transcribe streaming API
-- **Pronunciation Service** (Port 3001): Microsoft Speech SDK assessment
+- **Pronunciation Service** (Port 3001): Speech SDK assessment
 - **TTS Service** (Port 3011): AWS Polly neural voice synthesis
 
 #### **Database & Storage**
@@ -67,7 +67,7 @@ LinguaDaily is a comprehensive language learning platform that combines computer
 - AWS Rekognition (Computer Vision)
 - AWS Transcribe (Speech-to-Text)
 - AWS Polly (Text-to-Speech)
-- Microsoft Cognitive Services (Pronunciation Assessment)
+- Speech Cognitive Services (Pronunciation Assessment)
 
 ### **Backend Technologies**
 
@@ -145,12 +145,8 @@ GET /health # Service health check
    export AWS_SECRET_ACCESS_KEY="your_secret_key"
    export AWS_REGION="ap-southeast-1"
 
-Microsoft Speech Service
-export SPEECH_KEY="your_speech_service_key"
-export REGION="southeastasia"
-
-API Security
-export API_KEY="your_secure_api_key"
+   API Security
+   export API_KEY="your_secure_api_key"
 
 5. **Start the services**
    Main Flask application
@@ -211,25 +207,6 @@ We welcome contributions! Please follow these guidelines:
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- AWS for comprehensive cloud services
-- Microsoft Cognitive Services for speech technologies
-- OpenCV community for computer vision tools
-- Flask and Node.js communities for web frameworks
-
-## 📞 Support
-
-For support and questions:
-
-- Create an issue in this repository
-- Contact the development team
-- Check the documentation in `/docs`
 
 ---
 
