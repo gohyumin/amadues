@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcribe Your Audio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* Equivalent to rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Equivalent to shadow-md */
+            padding: 2rem; /* Equivalent to p-8 */
+            width: 100%;
+            max-width: 28rem; /* Equivalent to max-w-sm */
+            position: relative;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-2xl font-bold text-center mb-6">Transcribe Your Audio</h2>
+
+        <!-- Audio Recording Section -->
+        <div id="audio-section" class="space-y-4">
+            <div class="flex flex-col items-center">
+                <button id="record-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full text-lg mb-4 transition-colors">
+                    Start Recording
+                </button>
+                <p id="recording-status" class="text-gray-600 text-sm">Press to record</p>
+                <p id="timer" class="text-xl font-mono text-gray-700 mt-2">00:00</p>
+            </div>
+
+            <!-- Audio Playback -->
+            <div id="audio-playback-container" class="hidden flex flex-col items-center mt-4">
+                <audio id="audio-player" controls class="w-full"></audio>
+                <div class="flex space-x-4 mt-4">
+                    <button id="re-record-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors">
+                        Re-record
+                    </button>
+                    <button id="submit-audio-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition-colors">
+                        Transcribe
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transcript Display Section -->
+        <div id="transcript-section" class="hidden mt-6 space-y-4">
+            <label for="transcript-input" class="block text-gray-700 font-semibold mb-1">语音分析结果 (JSON Response)</label>
+            <textarea id="transcript-input" rows="10" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y font-mono text-sm"></textarea>
+            <button id="transcribe-another-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                Transcribe Another Audio
+            </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p id="loading-text" class="mt-4 text-gray-700">Processing...</p>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('record-btn');
+        const recordingStatus = document.getElementById('recording-status');
+        const timerEl = document.getElementById('timer');
+        const audioPlaybackContainer = document.getElementById('audio-playback-container');
+        const audioPlayer = document.getElementById('audio-player');
+        const reRecordBtn = document.getElementById('re-record-btn');
+        const submitAudioBtn = document.getElementById('submit-audio-btn');
+        const transcriptSection = document.getElementById('transcript-section');
+        const transcriptInput = document.getElementById('transcript-input');
+        const transcribeAnotherBtn = document.getElementById('transcribe-another-btn'); // Re-added
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+        let timerInterval;
+        let seconds = 0;
+        let isRecording = false;
+
+        const WEBHOOK_URL = 'https://n8n.smart87.me/webhook-test/pronunciation-assessment';
+
+        // --- Section Management ---
+        const sections = {
+            'audio-section': document.getElementById('audio-section'),
+            'transcript-section': document.getElementById('transcript-section')
+        };
+
+        const showSection = (sectionId) => {
+            for (const id in sections) {
+                if (sections.hasOwnProperty(id)) {
+                    if (id === sectionId) {
+                        sections[id].classList.remove('hidden');
+                    } else {
+                        sections[id].classList.add('hidden');
+                    }
+                }
+            }
+        };
+
+        // --- Utility Functions ---
+        const formatTime = (time) => {
+            const minutes = Math.floor(time / 60).toString().padStart(2, '0');
+            const seconds = Math.floor(time % 60).toString().padStart(2, '0');
+            return `${minutes}:${seconds}`;
+        };
+
+        const showLoading = (message) => {
+            loadingText.textContent = message;
+            loadingOverlay.classList.add('visible');
+        };
+
+        const hideLoading = () => {
+            loadingOverlay.classList.remove('visible');
+        };
+
+        const updateTimer = () => {
+            seconds++;
+            timerEl.textContent = formatTime(seconds);
+        };
+
+        const resetRecordingState = () => {
+            isRecording = false;
+            clearInterval(timerInterval);
+            seconds = 0;
+            timerEl.textContent = '00:00';
+            recordBtn.textContent = 'Start Recording';
+            recordBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            recordBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            recordingStatus.textContent = 'Press to record';
+            audioPlaybackContainer.classList.add('hidden');
+            recordBtn.style.display = 'block';
+            transcriptInput.value = '';
+        };
+
+        // --- Event Handlers ---
+        recordBtn.addEventListener('click', async () => {
+            if (isRecording) {
+                mediaRecorder.stop();
+            } else if (recordBtn.textContent === 'Record New Audio') {
+                resetRecordingState();
+                showSection('audio-section');
+            } else {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioURL = URL.createObjectURL(recordedAudioBlob);
+                        audioPlayer.src = audioURL;
+                        stream.getTracks().forEach(track => track.stop());
+
+                        recordBtn.style.display = 'none';
+                        recordingStatus.textContent = 'Recording finished.';
+                        audioPlaybackContainer.classList.remove('hidden');
+                        clearInterval(timerInterval);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.textContent = 'Stop Recording';
+                    recordBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    recordBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+                    recordingStatus.textContent = 'Recording...';
+                    seconds = 0;
+                    timerEl.textContent = '00:00';
+                    timerInterval = setInterval(updateTimer, 1000);
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    alert('Could not access microphone. Please allow access.'); // Using alert for simplicity as per previous instructions
+                    recordingStatus.textContent = 'Error: Microphone access denied.';
+                }
+            }
+        });
+
+        reRecordBtn.addEventListener('click', () => {
+            resetRecordingState();
+            showSection('audio-section');
+        });
+
+        submitAudioBtn.addEventListener('click', async () => {
+            showLoading('Transcribing audio...');
+
+            try {
+                console.log('Step 1: Fetching testing.wav file...');
+                // Always use testing.wav instead of recorded audio
+                const audioResponse = await fetch('testing.wav');
+                
+                if (!audioResponse.ok) {
+                    throw new Error(`Failed to load testing.wav: ${audioResponse.status} ${audioResponse.statusText}`);
+                }
+                
+                console.log('Step 2: Converting to blob...');
+                const testingWavBlob = await audioResponse.blob();
+                console.log('Blob size:', testingWavBlob.size, 'bytes');
+                
+                console.log('Step 3: Converting to base64...');
+                // Convert audio to base64 (safe method for large files)
+                const arrayBuffer = await testingWavBlob.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer);
+                let binaryString = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binaryString += String.fromCharCode(bytes[i]);
+                }
+                const base64Audio = btoa(binaryString);
+                
+                // Prepare JSON payload
+                const payload = {
+                    audio: base64Audio,
+                    referenceText: "各个国家有各个国家的国歌",
+                    language: "zh-CN"
+                };
+
+                console.log('Step 4: Preparing request...');
+                console.log('Payload size:', JSON.stringify(payload).length);
+                console.log('Base64 audio length:', base64Audio.length);
+                console.log('Sending request to:', WEBHOOK_URL);
+
+                console.log('Step 5: Sending to webhook...');
+                const webhookResponse = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                console.log('Step 6: Processing response...');
+                console.log('Response status:', webhookResponse.status);
+                console.log('Response headers:', Object.fromEntries(webhookResponse.headers.entries()));
+
+                if (!webhookResponse.ok) {
+                    const errorText = await webhookResponse.text();
+                    console.error('Server response:', errorText);
+                    throw new Error(`HTTP error! status: ${webhookResponse.status}, response: ${errorText}`);
+                }
+
+                const result = await webhookResponse.json();
+                console.log("Webhook response:", result);
+
+                // The response is an array with multiple objects
+                // Find the object with speech assessment data (has 'success' and 'data' fields)
+                const speechAssessmentResponse = result.find(item => 
+                    item.success !== undefined && item.data && typeof item.data === 'object'
+                );
+                
+                // Find the text response (has 'text' field)
+                const textResponse = result.find(item => item.text);
+                
+                console.log("Speech assessment response:", speechAssessmentResponse);
+                console.log("Text response:", textResponse);
+
+                if (!speechAssessmentResponse) {
+                    throw new Error('No speech assessment data found in response');
+                }
+
+                // Extract the actual data object from 'data' field
+                const actualData = speechAssessmentResponse.data;
+                console.log("Found speech assessment data:", actualData);
+
+                // Process the complete JSON response
+                let displayText = '';
+                
+                // Handle transcript text (main content)
+                const transcriptText = actualData.recognizedText || 'No transcript received.';
+                displayText += `识别文本: ${transcriptText}\n`;
+                
+                // Add reference text if available
+                if (actualData.referenceText) {
+                    displayText += `参考文本: ${actualData.referenceText}\n\n`;
+                } else {
+                    displayText += '\n';
+                }
+                
+                // Add TTS text response if available
+                if (textResponse && textResponse.text) {
+                    displayText += `=== AI 反馈 ===\n`;
+                    displayText += `${textResponse.text}\n\n`;
+                }
+                
+                // Handle overall scores from the 'overall' object
+                if (actualData.overall) {
+                    const overall = actualData.overall;
+                    displayText += `=== 综合评分 ===\n`;
+                    
+                    if (overall.pronunciationScore !== undefined && overall.pronunciationScore !== null) {
+                        displayText += `发音得分: ${overall.pronunciationScore}\n`;
+                    }
+                    
+                    if (overall.accuracyScore !== undefined && overall.accuracyScore !== null) {
+                        displayText += `准确度: ${overall.accuracyScore}\n`;
+                    }
+                    
+                    if (overall.completenessScore !== undefined && overall.completenessScore !== null) {
+                        displayText += `完整度: ${overall.completenessScore}\n`;
+                    }
+                    
+                    if (overall.fluencyScore !== undefined && overall.fluencyScore !== null) {
+                        displayText += `流利度: ${overall.fluencyScore}\n`;
+                    }
+                    
+                    if (overall.prosodyScore !== undefined && overall.prosodyScore !== null) {
+                        displayText += `韵律得分: ${overall.prosodyScore}\n`;
+                    }
+                    
+                    displayText += '\n';
+                }
+                
+                // Add word-level details if available
+                if (actualData.words && Array.isArray(actualData.words)) {
+                    displayText += `=== 词汇详情 (${actualData.words.length}个词) ===\n`;
+                    actualData.words.forEach((word) => {
+                        const wordText = word.word || '';
+                        const accuracy = word.accuracyScore || 'N/A';
+                        const errorType = word.errorType || '';
+                        const errorTypeEn = word.errorTypeEn || '';
+                        const index = word.index || '';
+                        
+                        displayText += `${index}. ${wordText}`;
+                        
+                        if (accuracy !== 'N/A') {
+                            displayText += ` - 准确度: ${accuracy}`;
+                        }
+                        
+                        if (errorType && errorType !== '正确' && errorType !== 'None') {
+                            displayText += ` (${errorType}`;
+                            if (errorTypeEn && errorTypeEn !== errorType) {
+                                displayText += ` / ${errorTypeEn}`;
+                            }
+                            displayText += ')';
+                        }
+                        displayText += '\n';
+                    });
+                    displayText += '\n';
+                }
+                
+                // Add timing information if available
+                if (speechAssessmentResponse.processingTime) {
+                    displayText += `处理时间: ${speechAssessmentResponse.processingTime}\n`;
+                }
+                
+                if (actualData.timestamp) {
+                    displayText += `时间戳: ${actualData.timestamp}\n`;
+                }
+                
+                if (actualData.language) {
+                    displayText += `语言: ${actualData.language}\n`;
+                }
+                
+                // Add success status if available
+                if (speechAssessmentResponse.success !== undefined) {
+                    displayText += `\n处理状态: ${speechAssessmentResponse.success ? '成功' : '失败'}\n`;
+                }
+                
+                // Add voice information if available
+                if (textResponse && textResponse.voice) {
+                    displayText += `语音合成: ${textResponse.voice}\n`;
+                }
+                
+                // Display the formatted result
+                transcriptInput.value = displayText;
+                
+                // Log detailed information to console
+                console.log('Parsed response data:', {
+                    transcript: transcriptText,
+                    hasOverallScores: !!actualData.overall,
+                    hasWords: !!(actualData.words && Array.isArray(actualData.words)),
+                    wordCount: actualData.words ? actualData.words.length : 0,
+                    processingTime: speechAssessmentResponse.processingTime,
+                    success: speechAssessmentResponse.success,
+                    hasTextResponse: !!textResponse,
+                    textResponseLength: textResponse ? textResponse.text?.length : 0
+                });
+                
+                showSection('transcript-section');
+                
+                audioPlaybackContainer.classList.add('hidden');
+                
+                recordBtn.style.display = 'block'; 
+                recordBtn.textContent = 'Record New Audio'; 
+                recordBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                recordBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                recordingStatus.textContent = 'Audio transcribed!';
+                timerEl.textContent = '00:00';
+                
+            } catch (error) {
+                console.error('Error sending audio to webhook:', error);
+                alert(`Failed to transcribe audio: ${error.message}`);
+                resetRecordingState();
+                showSection('audio-section');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Event listener for the new "Transcribe Another Audio" button
+        transcribeAnotherBtn.addEventListener('click', () => {
+            resetRecordingState(); // Reset recording state
+            showSection('audio-section'); // Go back to the audio recording section
+        });
+
+        // Initial setup when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('audio-section');
+            resetRecordingState(); // Ensure initial state is clean
+        });
+    </script>
+</body>
+</html>

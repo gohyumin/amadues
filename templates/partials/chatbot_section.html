@@ -1,0 +1,17 @@
+<!-- Chatbot Section -->
+<div class="chatbot-section">
+  <div class="chat-container" data-bot-avatar="{{ url_for('static', filename='assets/img/logo.png') }}">
+    <div id="chatLog" class="chat-log" aria-live="polite"></div>
+    <form id="chatForm" class="chat-input" autocomplete="off">
+      <button id="recordBtn" type="button" class="btn btn-outline-secondary" aria-label="Record audio" title="Record">
+        <span class="rec-dot d-none"></span>
+        <i class="bi bi-mic"></i>
+      </button>
+      <input id="chatText" name="text" type="text" class="form-control" placeholder="Type a message" />
+      <button id="sendBtn" type="submit" class="btn btn-primary">Send</button>
+    </form>
+    <div id="recHint" class="rec-hint d-none">Recording... press again to stop</div>
+  </div>
+</div>
+
+

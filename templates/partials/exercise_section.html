@@ -1,0 +1,344 @@
+<!-- Exercise Section -->
+<div class="exercise-container">
+  <!-- Exercise Selection View -->
+  <div class="exercise-selection" id="exerciseSelection">
+    <!-- Exercise Grid -->
+    <div class="exercise-grid" id="exerciseGrid">
+      <!-- Basic Greetings Scenario -->
+      <div class="scenario-card color-blue" data-scenario="basic">
+        <div class="scenario-content">
+          <div class="scenario-icon">
+            <i class="bi bi-chat-dots"></i>
+          </div>
+          <div class="scenario-info">
+            <h4 class="scenario-title">Basic Greetings</h4>
+            <p class="scenario-description">Practice common greeting expressions</p>
+            <div class="scenario-stats">
+              <span class="scenario-stat">
+                <i class="bi bi-chat-text"></i>
+                <span>5 Sentences</span>
+              </span>
+              <span class="scenario-stat">
+                <i class="bi bi-mic"></i>
+                <span>Speaking</span>
+              </span>
+            </div>
+            <div class="scenario-badge">Start</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ordering Food Scenario -->
+      <div class="scenario-card color-green" data-scenario="ordering">
+        <div class="scenario-content">
+          <div class="scenario-icon">
+            <i class="bi bi-cup-hot"></i>
+          </div>
+          <div class="scenario-info">
+            <h4 class="scenario-title">Ordering Food</h4>
+            <p class="scenario-description">Practice ordering at restaurants</p>
+            <div class="scenario-stats">
+              <span class="scenario-stat">
+                <i class="bi bi-chat-text"></i>
+                <span>5 Sentences</span>
+              </span>
+              <span class="scenario-stat">
+                <i class="bi bi-mic"></i>
+                <span>Speaking</span>
+              </span>
+            </div>
+            <div class="scenario-badge">Start</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asking Directions Scenario -->
+      <div class="scenario-card color-orange" data-scenario="directions">
+        <div class="scenario-content">
+          <div class="scenario-icon">
+            <i class="bi bi-signpost-2"></i>
+          </div>
+          <div class="scenario-info">
+            <h4 class="scenario-title">Asking Directions</h4>
+            <p class="scenario-description">Practice asking for and giving directions</p>
+            <div class="scenario-stats">
+              <span class="scenario-stat">
+                <i class="bi bi-chat-text"></i>
+                <span>5 Sentences</span>
+              </span>
+              <span class="scenario-stat">
+                <i class="bi bi-mic"></i>
+                <span>Speaking</span>
+              </span>
+            </div>
+            <div class="scenario-badge">Start</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise Practice View -->
+  <div class="exercise-practice d-none" id="exercisePractice">
+    <!-- Back Button Section -->
+    <div class="scenario-back-section">
+      <button class="btn btn-outline-secondary title-back-btn" id="backToSelection">
+        <i class="bi bi-arrow-left"></i> Back to Scenarios
+      </button>
+    </div>
+
+    <!-- Scenario Title Section -->
+    <div class="scenario-title-section">
+      <!-- Background decorations for different themes -->
+      <div class="theme-background-decorations" id="themeDecorations">
+        <!-- Clouds for Basic Greetings (blue theme) -->
+        <div class="theme-clouds basic-theme-clouds" data-theme="basic">
+          <div class="theme-cloud cloud-basic-1"></div>
+          <div class="theme-cloud cloud-basic-2"></div>
+          <div class="theme-cloud cloud-basic-3"></div>
+          <div class="theme-cloud cloud-basic-4"></div>
+          <div class="theme-cloud cloud-basic-5"></div>
+          <div class="theme-cloud cloud-basic-6"></div>
+          <div class="theme-cloud cloud-basic-7"></div>
+          <div class="theme-cloud cloud-basic-8"></div>
+        </div>
+        
+        <!-- Steam for Ordering Food (green theme) -->
+        <div class="theme-elements ordering-theme-elements" data-theme="ordering">
+          <div class="food-steam-element steam-1"></div>
+          <div class="food-steam-element steam-2"></div>
+          <div class="food-steam-element steam-3"></div>
+          <div class="food-steam-element steam-4"></div>
+        </div>
+        
+        <!-- Direction arrows for Asking Directions (orange theme) -->
+        <div class="theme-elements directions-theme-elements" data-theme="directions">
+          <div class="direction-arrow arrow-1"></div>
+          <div class="direction-arrow arrow-2"></div>
+          <div class="direction-arrow arrow-3"></div>
+          <div class="direction-arrow arrow-4"></div>
+        </div>
+      </div>
+      
+      <div class="scenario-text">
+        <h3 id="currentScenarioTitle">Basic Greetings</h3>
+        <p id="currentScenarioDescription">Practice common greeting expressions</p>
+      </div>
+    </div>
+
+    <!-- Learning Path -->
+    <div class="learning-path" id="learningPath">
+      <!-- Ground decorations for different scenarios -->
+      <div class="path-ground-decorations" id="pathGroundDecorations">
+        <!-- Basic Greetings - Garden with flowers -->
+        <div class="ground-decoration basic-ground" data-ground-theme="basic">
+          <div class="grass-layer"></div>
+          <div class="flower flower-1">🌸</div>
+          <div class="flower flower-2">🌼</div>
+          <div class="flower flower-3">🌺</div>
+          <div class="flower flower-4">🌻</div>
+          <div class="flower flower-5">🌷</div>
+          <div class="butterfly butterfly-1">🦋</div>
+          <div class="butterfly butterfly-2">🦋</div>
+        </div>
+        
+        <!-- Ordering Food - Restaurant floor with food items -->
+        <div class="ground-decoration ordering-ground" data-ground-theme="ordering">
+          <div class="restaurant-floor"></div>
+          <div class="food-item food-1">🍕</div>
+          <div class="food-item food-2">🍔</div>
+          <div class="food-item food-3">🍜</div>
+          <div class="food-item food-4">🥗</div>
+          <div class="utensil utensil-1">🍴</div>
+          <div class="utensil utensil-2">🥢</div>
+        </div>
+        
+        <!-- Asking Directions - Street with road signs -->
+        <div class="ground-decoration directions-ground" data-ground-theme="directions">
+          <div class="street-surface"></div>
+          <div class="road-sign sign-1">🚦</div>
+          <div class="road-sign sign-2">🚏</div>
+          <div class="building building-1">🏢</div>
+          <div class="building building-2">🏪</div>
+          <div class="vehicle vehicle-1">🚗</div>
+          <div class="vehicle vehicle-2">🚌</div>
+        </div>
+      </div>
+      
+      <div class="path-container">
+        <svg class="path-svg" viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet">
+          <!-- Path line will be drawn here -->
+          <path id="pathLine" d="M 50 100 Q 200 50 350 100 Q 500 150 650 100 Q 750 50 750 100" 
+                stroke="#ddd" stroke-width="3" fill="none" stroke-dasharray="5,5"/>
+        </svg>
+        
+        <!-- Moving logo will be positioned here -->
+        <div class="moving-logo" id="movingLogo">
+          <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="Amadeus Logo" />
+        </div>
+        
+        <!-- Path nodes will be positioned here -->
+        <div class="path-nodes" id="pathNodes">
+          <!-- Nodes will be generated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Sentence Practice Area -->
+    <div class="sentence-practice d-none" id="sentencePractice">
+      <!-- Listen Phase -->
+      <div class="practice-phase listen-phase" id="listenPhase">
+        <div class="phase-header">
+          <h4><i class="bi bi-volume-up"></i> Listen</h4>
+          <p>Click play to listen to the sentence</p>
+        </div>
+        
+        <div class="sentence-display">
+          <div class="sentence-text" id="sentenceText">
+            <!-- Sentence will be displayed here -->
+          </div>
+          <div class="sentence-translation" id="sentenceTranslation">
+            <!-- Translation will be displayed here -->
+          </div>
+        </div>
+
+        <div class="phase-controls">
+          <button class="btn btn-primary btn-lg play-btn" id="playSentence">
+            <i class="bi bi-play-fill"></i> Start to Play
+          </button>
+          <button class="btn btn-outline-primary" id="readyToSpeak" disabled>
+            <i class="bi bi-check2"></i> Ready to Speak
+          </button>
+        </div>
+      </div>
+
+      <!-- Speak Phase -->
+      <div class="practice-phase speak-phase d-none" id="speakPhase">
+        <div class="phase-header">
+          <h4><i class="bi bi-mic"></i> Speak</h4>
+          <p>Now repeat the sentence. Click record when ready</p>
+        </div>
+
+        <div class="sentence-display">
+          <div class="sentence-text" id="speakSentenceText">
+            <!-- Same sentence for reference -->
+          </div>
+          <div class="pronunciation-guide" id="pronunciationGuide">
+            <!-- Pronunciation guide if needed -->
+          </div>
+        </div>
+
+        <div class="phase-controls">
+          <button class="btn btn-danger btn-lg record-btn" id="recordSpeech">
+            <i class="bi bi-mic"></i> Hold to Record
+          </button>
+          <button class="btn btn-outline-secondary" id="replayOriginal">
+            <i class="bi bi-arrow-repeat"></i> Replay Original
+          </button>
+        </div>
+
+        <!-- Recording Status -->
+        <div class="recording-status d-none" id="recordingStatus">
+          <div class="status-indicator">
+            <i class="bi bi-record-circle"></i>
+            <span>Recording... Release when done</span>
+          </div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="playback-controls d-none" id="playbackControls">
+          <p>Your recording:</p>
+          <div class="playback-actions">
+            <button class="btn btn-outline-info" id="playMyRecording">
+              <i class="bi bi-play"></i> Play My Voice
+            </button>
+            <button class="btn btn-success" id="acceptRecording">
+              <i class="bi bi-check-lg"></i> Good, Next
+            </button>
+            <button class="btn btn-warning" id="retryRecording">
+              <i class="bi bi-arrow-clockwise"></i> Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practice Navigation -->
+      <div class="practice-navigation">
+        <button class="btn btn-outline-secondary" id="backToPath">
+          <i class="bi bi-arrow-left"></i> Back to Path
+        </button>
+        <div class="current-sentence-info">
+          <span>Sentence <span id="currentSentenceNum">1</span> of <span id="totalSentences">5</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion View -->
+  <div class="exercise-completion d-none" id="exerciseCompletion">
+    <div class="completion-content">
+      <div class="completion-icon">
+        <i class="bi bi-trophy"></i>
+      </div>
+      <h3>Scenario Complete!</h3>
+      <p id="completionMessage">Great job! You've completed all 5 sentences in this scenario.</p>
+      
+      <div class="completion-stats">
+        <div class="stat">
+          <span class="stat-value" id="completedSentences">--</span>
+          <span class="stat-label">Sentences Practiced</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="practiceTime">--</span>
+          <span class="stat-label">Time Spent</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="retryCount">--</span>
+          <span class="stat-label">Total Retries</span>
+        </div>
+      </div>
+
+      <div class="completion-actions">
+        <button class="btn btn-success" id="reviewExercise">
+          <i class="bi bi-eye"></i> Review Sentences
+        </button>
+        <button class="btn btn-primary" id="practiceAgain">
+          <i class="bi bi-arrow-repeat"></i> Practice Again
+        </button>
+        <button class="btn btn-outline-primary" id="chooseNewScenario">
+          <i class="bi bi-grid-3x3-gap"></i> Choose New Scenario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise Review View -->
+  <div class="exercise-review d-none" id="exerciseReview">
+    <div class="review-content">
+      <div class="review-header">
+        <div class="review-title">
+          <h3 id="reviewScenarioTitle">Review: Basic Greetings</h3>
+          <p>All sentences practiced in this scenario</p>
+        </div>
+      </div>
+
+      <div class="review-sentences" id="reviewSentences">
+        <!-- Review sentences will be generated here -->
+      </div>
+
+      <div class="review-navigation">
+        <button class="btn btn-outline-secondary" id="backToCompletion">
+          <i class="bi bi-arrow-left"></i> Back to Results
+        </button>
+        <div class="review-actions-right">
+          <button class="btn btn-primary" id="retryFromReview">
+            <i class="bi bi-arrow-repeat"></i> Practice Again
+          </button>
+          <button class="btn btn-outline-primary" id="newScenarioFromReview">
+            <i class="bi bi-grid-3x3-gap"></i> Choose New Scenario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

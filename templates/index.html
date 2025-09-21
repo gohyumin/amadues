@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Amadeus — Your Everyday AI Learning Companion</title>
+  <meta name="description" content="Amadeus is an everyday AI study companion that fits your life—personalized plans, friendly chat, camera practice, and a motivating streak calendar.">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+
+  <!-- Main CSS File -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}">
+
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="{{ url_for('home') }}" class="logo d-flex align-items-center me-auto me-xl-0">
+        <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="Amadeus Logo" style="height:40px;width:auto;margin-right:8px;">
+        <h1 class="sitename">Amadeus</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="#hero" class="active">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+      <a class="btn-getstarted" href="{{ url_for('register_page') }}">Get Started</a>
+
+    </div>
+  </header>
+
+  <main class="main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="container" style="margin-top: 90px;">
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category=='danger' else category }}" role="alert" style="margin-bottom:10px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+
+          <div class="col-lg-8" data-aos="zoom-in" data-aos-delay="200">
+            <div class="hero-content text-center">
+              <div class="hero-badge" data-aos="fade-down" data-aos-delay="300">
+                <i class="bi bi-star-fill"></i>
+                <span>Learning Powerfully</span>
+              </div>
+              <h1 class="hero-title" data-aos="fade-up" data-aos-delay="400">An AI learning companion for your everyday life</h1>
+              <p class="hero-description" data-aos="fade-up" data-aos-delay="500">Amadeus fits around your routine—ask in natural language, get tailored lessons, practice with your camera, and stay consistent with a motivating streak calendar.</p>
+
+              <div class="hero-actions" data-aos="fade-up" data-aos-delay="600">
+                <a href="{{ url_for('register_page') }}" class="btn-primary">Start Learning</a>
+                <a href="#features" class="btn-outline">Explore Features</a>
+              </div>
+
+              <div class="hero-metrics" data-aos="fade-up" data-aos-delay="700">
+                <div class="metric-item">
+                  <div class="metric-icon">
+                    <i class="bi bi-trophy"></i>
+                  </div>
+                  <div class="metric-content">
+                    <span class="metric-number" data-target="85">0</span>
+                    <span class="metric-label">Awards Won</span>
+                  </div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-icon">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <div class="metric-content">
+                    <span class="metric-number" data-target="500">0</span>
+                    <span class="metric-label">Happy Clients</span>
+                  </div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-icon">
+                    <i class="bi bi-globe"></i>
+                  </div>
+                  <div class="metric-content">
+                    <span class="metric-number" data-target="25">0</span>
+                    <span class="metric-label">Countries</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Hero Section -->
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row align-items-center gy-5">
+
+          <div class="col-lg-5" data-aos="fade-right" data-aos-delay="200">
+            <div class="image-section">
+              <div class="primary-image">
+               <img src="{{ url_for('static', filename='assets/img/about/about-14.webp') }}" 
+     alt="Corporate office environment" class="img-fluid">
+
+<div class="image-grid">
+  <img src="{{ url_for('static', filename='assets/img/about/about-3.webp') }}" 
+       alt="Professional workspace" class="img-fluid grid-img">
+  <img src="{{ url_for('static', filename='assets/img/about/about-7.webp') }}" 
+       alt="Team collaboration" class="img-fluid grid-img">
+</div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7" data-aos="fade-left" data-aos-delay="300">
+            <div class="content-section">
+              <div class="section-intro">
+                <div class="company-badge">WHO WE ARE</div>
+                <h2>Your everyday AI learning companion</h2>
+                <p class="intro-text">Amadeus supports how you actually live and learn. It adapts to your schedule and goals, chats like a friendly tutor, guides camera-based practice for real‑life tasks, and keeps you on track with a simple, privacy‑first streak calendar.</p>
+              </div>
+
+              <div class="achievement-list">
+                <div class="achievement-item">
+                  <div class="achievement-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                  </div>
+                  <div class="achievement-content">
+                    <h4>Personalized Paths</h4>
+                    <p>Adaptive plans shaped by your interests, level, and pace—updated as your life changes.</p>
+                  </div>
+                </div>
+                <div class="achievement-item">
+                  <div class="achievement-icon">
+                    <i class="bi bi-people-fill"></i>
+                  </div>
+                  <div class="achievement-content">
+                    <h4>Always‑on AI Buddy</h4>
+                    <p>Conversational guidance, instant feedback, and gentle nudges that fit your daily routine.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="action-section">
+                <a href="#" class="btn btn-primary">Learn More About Us</a>
+                <div class="contact-info">
+                  <span class="contact-label">Call us directly:</span>
+                  <strong class="phone-number">+60 19 739 3226</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="metrics-section" data-aos="fade-up" data-aos-delay="400">
+          <div class="row text-center">
+            <div class="col-lg-3 col-md-6">
+              <div class="metric-card">
+                <div class="metric-value metric-number" data-target="480">0</div>
+                <div class="metric-label">Successful Projects</div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="metric-card">
+                <div class="metric-value metric-number" data-target="99">0</div>
+                <div class="metric-label">Customer Satisfaction</div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="metric-card">
+                <div class="metric-value metric-number" data-target="65">0</div>
+                <div class="metric-label">Team Members</div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="metric-card">
+                <div class="metric-value">24/7</div>
+                <div class="metric-label">Customer Support</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /About Section -->
+
+    <!-- Features Section -->
+    <section id="features" class="features section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Everyday learning features</h2>
+        <p>Personalized plans, conversational tutoring, camera‑assisted practice, and a motivating calendar—everything you need to learn better, a little every day.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row align-items-center">
+
+          <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
+            <div class="features-content">
+              <h2>Study with an AI companion that fits your life</h2>
+              <p class="lead">Ask anything, get tailored explanations and quizzes, and practice with your camera—on your schedule. Your plan adapts as your days do.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+            <div class="features-image">
+              <img src="{{ url_for('static', filename='assets/img/features/features-4.webp') }}" alt="" class="img-fluid">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="features-grid" data-aos="fade-up" data-aos-delay="400">
+
+          <div class="feature-item" data-aos="zoom-in" data-aos-delay="100">
+            <div class="feature-icon">
+              <i class="bi bi-lightning-charge"></i>
+            </div>
+            <div class="feature-content">
+            <h4>Personalized Paths</h4>
+            <p>Lessons and drills that follow your goals, level, and pace—no cramming required.</p>
+            </div>
+          </div><!-- End Feature Item -->
+
+          <div class="feature-item" data-aos="zoom-in" data-aos-delay="200">
+            <div class="feature-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="feature-content">
+            <h4>Private by Design</h4>
+            <p>Secure, private learning—your data stays under your control, not ours.</p>
+            </div>
+          </div><!-- End Feature Item -->
+
+          <div class="feature-item" data-aos="zoom-in" data-aos-delay="300">
+            <div class="feature-icon">
+              <i class="bi bi-gem"></i>
+            </div>
+            <div class="feature-content">
+            <h4>AI Study Buddy</h4>
+            <p>Conversational guidance, instant feedback, and smart practice tasks for daily progress.</p>
+            </div>
+          </div><!-- End Feature Item -->
+
+          <div class="feature-item" data-aos="zoom-in" data-aos-delay="400">
+            <div class="feature-icon">
+              <i class="bi bi-rocket-takeoff"></i>
+            </div>
+            <div class="feature-content">
+            <h4>Camera Practice</h4>
+            <p>Rehearse presentations, pronunciation, and whiteboard work—anywhere, anytime.</p>
+            </div>
+          </div><!-- End Feature Item -->
+
+        </div>
+
+      </div>
+
+    </section><!-- /Features Section -->
+
+    <!-- Services Section -->
+    <section id="services" class="services section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Services</h2>
+        <p>From personalized plans to an always‑on AI companion and camera practice—choose the services that fit your everyday learning.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="services-grid">
+          <div class="row g-4">
+
+            <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="100">
+              <div class="featured-service-card">
+                <div class="service-badge">Most Popular</div>
+                <div class="service-icon-large">
+                  <i class="bi bi-rocket-takeoff"></i>
+                </div>
+                <h3>Personalized Everyday Plans</h3>
+                <p>Adaptive roadmaps that evolve with your progress, interests, and schedule—no two learners get the same plan.</p>
+                <div class="feature-highlights">
+                  <div class="highlight-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>24/7 Processing</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Smart Analytics</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Easy Integration</span>
+                  </div>
+                </div>
+                <a href="{{ url_for('service_details') }}" class="btn-primary">Get Started Free</a>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="row g-4">
+
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                  <div class="service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4>Private & Secure</h4>
+                    <p>End‑to‑end focus on privacy. Your learning data is protected and always under your control.</p>
+                    <a href="{{ url_for('service_details') }}" class="service-link">
+                      <span>Learn More</span>
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="250">
+                  <div class="service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h4>Progress Insights</h4>
+                    <p>Clear visuals for streaks, milestones, and skills—see what to review and what’s next.</p>
+                    <a href="{{ url_for('service_details') }}" class="service-link">
+                      <span>Learn More</span>
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                  <div class="service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-people"></i>
+                    </div>
+                    <h4>AI Study Buddy</h4>
+                    <p>Always‑on conversational support with examples, quizzes, and feedback that fit your day.</p>
+                    <a href="{{ url_for('service_details') }}" class="service-link">
+                      <span>Learn More</span>
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="350">
+                  <div class="service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-cloud-arrow-up"></i>
+                    </div>
+                    <h4>Camera Practice</h4>
+                    <p>Practice presentations, pronunciation, or whiteboard tasks using your camera—on the go.</p>
+                    <a href="{{ url_for('service_details') }}" class="service-link">
+                      <span>Learn More</span>
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="services-tabs mt-5">
+          <ul class="nav nav-pills justify-content-center mb-5" id="services-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="services-development-tab" data-bs-toggle="pill" data-bs-target="#services-development" type="button" role="tab">Learning Modes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="services-marketing-tab" data-bs-toggle="pill" data-bs-target="#services-marketing" type="button" role="tab">Motivation</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="services-support-tab" data-bs-toggle="pill" data-bs-target="#services-support" type="button" role="tab">Support</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="services-tabs-content">
+
+            <div class="tab-pane fade show active" id="services-development" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-laptop"></i>
+                    </div>
+                    <h5>Chat & Quizzes</h5>
+                    <p>Natural language Q&A with instant practice — explanations, flashcards, and mini‑quizzes.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-phone"></i>
+                    </div>
+                    <h5>Camera Mode</h5>
+                    <p>Practice speaking, presenting, or solving problems on a whiteboard with feedback.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-server"></i>
+                    </div>
+                    <h5>Projects</h5>
+                    <p>Hands‑on tasks generated by AI to help you apply knowledge in real scenarios.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="services-marketing" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-megaphone"></i>
+                    </div>
+                    <h5>Calendar & Streaks</h5>
+                    <p>Beautiful calendar with streak tracking to keep you consistent and motivated.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-search"></i>
+                    </div>
+                    <h5>Milestones</h5>
+                    <p>Celebrate progress with badges and milestones as you master new skills.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-share"></i>
+                    </div>
+                    <h5>Recommendations</h5>
+                    <p>Smart suggestions for what to learn next and what to review today.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="services-support" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-headset"></i>
+                    </div>
+                    <h5>24/7 Support</h5>
+                    <p>Get help any time. We’re here when your study session needs a hand.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-tools"></i>
+                    </div>
+                    <h5>Community & Tips</h5>
+                    <p>Best practices and study tips curated by AI and the community.</p>
+                    <a href="{{ url_for('service_details') }}" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                  <div class="tab-service-card">
+                    <div class="service-icon">
+                      <i class="bi bi-person-check"></i>
+                    </div>
+                    <h5>Help Center</h5>
+                    <p>Guides and FAQs to quickly answer common questions while learning.</p>
+                    <a href="service-details.html" class="tab-service-link">View Details</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Services Section -->
+
+    <!-- Features 2 Section -->
+    <section id="features-2" class="features-2 section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="features-list row gy-4">
+          <div class="col-md-6">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+              <div class="feature-icon">
+                <i class="bi bi-cpu"></i>
+              </div>
+              <div class="feature-content">
+                <h4>AI‑Powered Guidance</h4>
+                <p>Amadeus turns questions into clear explanations, examples, and quick quizzes—so you learn faster with less friction.</p>
+                <div class="feature-tags">
+                  <span>Smart</span>
+                  <span>Automated</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+              <div class="feature-icon">
+                <i class="bi bi-cloud-check"></i>
+              </div>
+              <div class="feature-content">
+                <h4>Cloud Sync</h4>
+                <p>Pick up where you left off across devices. Your plan and progress are always in sync and under your control.</p>
+                <div class="feature-tags">
+                  <span>Scalable</span>
+                  <span>Reliable</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+              <div class="feature-icon">
+                <i class="bi bi-people"></i>
+              </div>
+              <div class="feature-content">
+                <h4>Solo or With Others</h4>
+                <p>Learn privately or share milestones with classmates and friends—stay motivated your way.</p>
+                <div class="feature-tags">
+                  <span>Collaborative</span>
+                  <span>Efficient</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="400">
+              <div class="feature-icon">
+                <i class="bi bi-bar-chart"></i>
+              </div>
+              <div class="feature-content">
+                <h4>Helpful Insights</h4>
+                <p>See simple, actionable insights about what to study next and where you improve the most.</p>
+                <div class="feature-tags">
+                  <span>Insights</span>
+                  <span>Data-driven</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-section" data-aos="fade-up" data-aos-delay="500">
+          <a href="#" class="btn-primary">Get Started Today</a>
+          <a href="#" class="btn-secondary">View Demo</a>
+        </div>
+      </div>
+
+    </section><!-- /Features 2 Section -->
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>What learners say</h2>
+        <p>Real stories from people using Amadeus to study smarter with AI.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="testimonials-slider-wrapper">
+          <div class="testimonials-carousel">
+
+            <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="200">
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "My AI study buddy explains concepts at my level and quizzes me instantly. I finally kept a 21‑day streak!"
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-f-12.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>Sarah Williams</h4>
+                  <span class="title">College Student</span>
+                  <div class="company">Computer Science</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card featured" data-aos="zoom-in" data-aos-delay="300">
+              <div class="featured-badge">
+                <i class="bi bi-award-fill"></i>
+                <span>Top Review</span>
+              </div>
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "Camera mode helped me rehearse presentations with feedback. I feel more confident speaking now."
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-m-11.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>Michael Chen</h4>
+                  <span class="title">Graduate Researcher</span>
+                  <div class="company">AI Lab</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="400">
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "The personalized plan adapts every week. I always know what to review and what’s next."
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-f-14.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>Emma Rodriguez</h4>
+                  <span class="title">Language Learner</span>
+                  <div class="company">Spanish B1</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="500">
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "I ask anything in natural language and get clear explanations with examples and mini‑quizzes."
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-m-14.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>James Parker</h4>
+                  <span class="title">Self‑Learner</span>
+                  <div class="company">STEM</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="600">
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "Privacy matters to me. Amadeus keeps my data private while giving great insights."
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-f-13.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>Lisa Thompson</h4>
+                  <span class="title">Working Professional</span>
+                  <div class="company">Lifelong Learner</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="700">
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <blockquote>
+                "The streak calendar keeps me accountable. It’s the first time I’ve studied consistently for months."
+              </blockquote>
+              <div class="user-profile">
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='assets/img/person/person-m-15.webp') }}" alt="User" class="img-fluid">
+                </div>
+                <div class="user-info">
+                  <h4>David Kim</h4>
+                  <span class="title">High School Learner</span>
+                  <div class="company">Math &amp; Physics</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Testimonials Section -->
+
+    
+
+    <!-- Faq Section -->
+    <section id="faq" class="faq section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+
+            <div class="faq-container">
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">How does the AI personalize my learning plan?</h3>
+                    <div class="answer">
+                    <p>Amadeus adapts to your goals, level, and pace using your inputs and practice results. Your plan updates automatically with bite‑size lessons, quizzes, and reviews that fit your day.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="250">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">Is my data private?</h3>
+                    <div class="answer">
+                      <p>Yes. We’re private by design. Your learning data is protected and never sold. You decide what’s stored and can export or delete anytime.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">What is Camera Mode?</h3>
+                    <div class="answer">
+                      <p>Camera Mode lets you rehearse presentations, practice pronunciation, or do whiteboard tasks—anywhere. Get time‑boxed prompts and feedback to improve faster.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="350">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">How do streaks and calendar help?</h3>
+                    <div class="answer">
+                      <p>The calendar tracks your study streak and milestones to keep you motivated. See what to review each day and celebrate progress.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">Can I ask questions in natural language?</h3>
+                    <div class="answer">
+                      <p>Absolutely. Chat with the AI like a tutor—ask anything and get clear explanations, examples, and mini‑quizzes tailored to you.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+              <div class="faq-item" data-aos="fade-up" data-aos-delay="450">
+                <div class="question-wrapper">
+                  <div class="icon-wrapper">
+                    <i class="bi bi-patch-question"></i>
+                  </div>
+                  <div class="content-wrapper">
+                    <h3 class="question">Do you support different subjects?</h3>
+                    <div class="answer">
+                      <p>Yes. Popular areas include languages, math, science, presentations, and more. Your plan is customized to your topics.</p>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End FAQ Item -->
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Faq Section -->
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section light-background">
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Contact</h2>
+        <p>Questions about Amadeus? Reach out—we’re here to help you learn better, every day.</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row g-0">
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+            <div class="contact-info-panel">
+              <div class="panel-content">
+                <div class="info-header">
+                  <h2>Ready to start?</h2>
+                  <p>Tell us about your goals and we’ll help you build a personalized learning plan.</p>
+                </div>
+
+                <div class="info-grid">
+                  <div class="info-card" data-aos="slide-up" data-aos-delay="250">
+                    <div class="card-icon">
+                      <i class="bi bi-house-door"></i>
+                    </div>
+                    <div class="card-content">
+                      <h4>Visit Our Office</h4>
+                      <p>Multimedia University<br>Jalan Ayer Keroh Lama, 75450 Bukit Beruang, Melaka</p>
+                    </div>
+                  </div>
+
+                  <div class="info-card" data-aos="slide-up" data-aos-delay="300">
+                    <div class="card-icon">
+                      <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <div class="card-content">
+                      <h4>Email Us</h4>
+                      <p>goh.yu.min@student.mmu.edu.my</p>
+                    </div>
+                  </div>
+
+                  <div class="info-card" data-aos="slide-up" data-aos-delay="350">
+                    <div class="card-icon">
+                      <i class="bi bi-headset"></i>
+                    </div>
+                    <div class="card-content">
+                      <h4>Call Us</h4>
+                      <p>+60 19 739 3226</p>
+                    </div>
+                  </div>
+
+                  <div class="info-card" data-aos="slide-up" data-aos-delay="400">
+                    <div class="card-icon">
+                      <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="card-content">
+                      <h4>Business Hours</h4>
+                      <p>Mon–Fri: 8AM–7PM<br>Weekends: By Appointment</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="social-section" data-aos="fade-in" data-aos-delay="450">
+                  <h5>Follow Our Journey</h5>
+                  <div class="social-icons">
+                    <a href="#" class="social-icon">
+                      <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="social-icon">
+                      <i class="bi bi-twitter-x"></i>
+                    </a>
+                    <a href="#" class="social-icon">
+                      <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="social-icon">
+                      <i class="bi bi-instagram"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6" data-aos="slide-left" data-aos-delay="300">
+            <div class="contact-form-wrapper">
+              <div class="form-header">
+                <h3>Drop Us a Line</h3>
+                <div class="header-line"></div>
+              </div>
+
+              <form action="forms/contact.php" method="post" class="php-email-form modern-form">
+                <div class="form-group">
+                  <input type="text" name="name" class="form-control" id="fullName" placeholder="Full Name" required>
+                </div>
+
+                <div class="form-group">
+                  <input type="email" class="form-control" name="email" id="emailAddress" placeholder="Email Address" required>
+                </div>
+
+                <div class="form-group">
+                  <input type="tel" class="form-control" name="phone" id="phoneNumber" placeholder="Phone Number">
+                </div>
+
+                <div class="form-group">
+                  <input type="text" class="form-control" name="subject" id="emailSubject" placeholder="Subject" required>
+                </div>
+
+                <div class="form-group">
+                  <textarea class="form-control" name="message" id="messageContent" rows="6" placeholder="Tell us about your goals and what you’d like to learn" required></textarea>
+                </div>
+
+                <div class="my-3">
+                  <div class="loading">Loading</div>
+                  <div class="error-message"></div>
+                  <div class="sent-message">Your message has been sent. Thank you!</div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                  <span class="btn-text">Send Message</span>
+                  <span class="btn-icon">
+                    <i class="bi bi-arrow-right"></i>
+                  </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Contact Section -->
+
+  </main>
+
+  <footer id="footer" class="footer position-relative light-background">
+    <div class="container">
+      <div class="footer-main" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-4 align-items-center">
+          <div class="col-lg-4">
+            <div class="brand-section">
+              <a href="index.html" class="logo d-flex align-items-center mb-4">
+                <span class="sitename">Amadeus</span>
+              </a>
+              <p class="brand-description">Your everyday AI companion for natural conversations and meaningful learning—made to fit your life.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="nav-column">
+              <h6>Quick Links</h6>
+              <nav class="footer-nav">
+                <a href="#hero">Home</a>
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#services">Services</a>
+                <a href="#contact">Contact</a>
+              </nav>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="social-section">
+              <h6>Connect With Us</h6>
+              <div class="social-links">
+                <a href="#" class="social-link">
+                  <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" class="social-link">
+                  <i class="bi bi-instagram"></i>
+                </a>
+                <a href="#" class="social-link">
+                  <i class="bi bi-twitter-x"></i>
+                </a>
+                <a href="#" class="social-link">
+                  <i class="bi bi-linkedin"></i>
+                </a>
+              </div>
+
+              <div class="contact-info mt-4">
+                <div class="contact-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>Multimedia University<br>Jalan Ayer Keroh Lama, 75450 Bukit Beruang, Melaka</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-telephone"></i>
+                  <span>+60 19 739 3226</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-envelope"></i>
+                  <span>goh.yu.min@student.mmu.edu.my</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="bottom-content" data-aos="fade-up" data-aos-delay="300">
+          <div class="row align-items-center">
+            <div class="col-lg-6">
+              <div class="copyright">
+                <p>© <span class="sitename">Amadeus</span>. All rights reserved.</p>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="legal-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <div class="credits">
+                  Designed by Team Amadeus
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#hero" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+<script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/vendor/php-email-form/validate.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/vendor/aos/aos.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+
+
+  <!-- Main JS File -->
+  <script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+<!-- Webcam Section -->
+<div class="webcam-container">
+  <!-- Camera Controls -->
+  <div class="camera-controls">
+    <div class="control-buttons">
+      <button id="startCameraBtn" class="btn btn-primary">
+        <i class="bi bi-camera-video"></i> Start Camera
+      </button>
+      <button id="stopCameraBtn" class="btn btn-outline-secondary d-none">
+        <i class="bi bi-camera-video-off"></i> Stop Camera
+      </button>
+      <button id="captureBtn" class="btn btn-success d-none">
+        <i class="bi bi-camera"></i> Capture & Analyze
+      </button>
+    </div>
+    <div class="camera-status">
+      <span id="cameraStatus" class="status-text">Camera Ready</span>
+    </div>
+  </div>
+
+  <!-- Camera Preview -->
+  <div class="camera-preview">
+    <div class="video-container">
+      <video id="webcamVideo" autoplay playsinline muted></video>
+      <canvas id="captureCanvas" class="d-none"></canvas>
+    </div>
+    <div class="preview-overlay">
+      <div class="scan-frame"></div>
+      <p class="scan-instruction">Point your camera at objects to discover vocabulary</p>
+    </div>
+  </div>
+
+  <!-- Analysis Results -->
+  <div class="analysis-results d-none" id="analysisResults">
+    <div class="results-header">
+      <h4><i class="bi bi-lightbulb"></i> Vocabulary Discovered</h4>
+      <button id="clearResultsBtn" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-trash"></i> Clear
+      </button>
+    </div>
+    <div class="vocabulary-grid" id="vocabularyGrid">
+      <!-- Discovered vocabulary will be displayed here -->
+    </div>
+  </div>
+
+  <!-- Learning Statistics -->
+  <div class="webcam-stats">
+    <div class="stat-item">
+      <div class="stat-number" id="totalDiscovered">0</div>
+      <div class="stat-label">Words Discovered</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="todayDiscovered">0</div>
+      <div class="stat-label">Today's Discoveries</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="savedWords">0</div>
+      <div class="stat-label">Saved to Vocabulary</div>
+    </div>
+  </div>
+
+  <!-- Recent Discoveries -->
+  <div class="recent-discoveries">
+    <h5>Recent Discoveries</h5>
+    <div class="discoveries-list" id="discoveriesList">
+      <p class="empty-state">No discoveries yet. Start using your camera to find new vocabulary!</p>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="webcam-instructions">
+    <h5><i class="bi bi-info-circle"></i> How to Use</h5>
+    <div class="instruction-steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <strong>Start Camera</strong>
+          <p>Click "Start Camera" to activate your webcam</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <strong>Point & Capture</strong>
+          <p>Point your camera at objects around you and click "Capture & Analyze"</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <strong>Learn Vocabulary</strong>
+          <p>Discover new words and their translations, then save them to your vocabulary list</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

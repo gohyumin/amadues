@@ -1,0 +1,288 @@
+/* Learning Calendar Styles */
+.calendar-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.calendar-widget {
+  padding: 20px;
+  background: var(--surface-color, #ffffff);
+  border-radius: 8px;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 5px;
+  background: transparent;
+}
+
+.weekday {
+  background: transparent;
+  padding: 8px 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--default-color), transparent 40%);
+  border: none;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  background: transparent;
+  padding: 10px 0;
+}
+
+.calendar-day {
+  background: var(--surface-color, #f6f8fa);
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 85%);
+  text-align: center;
+  min-width: 36px;
+  min-height: 36px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  border-radius: 3px;
+  color: var(--default-color);
+}
+
+.calendar-day:hover {
+  border-color: color-mix(in srgb, var(--default-color), transparent 60%);
+  transform: scale(1.1);
+}
+
+.calendar-day.other-month {
+  color: color-mix(in srgb, var(--default-color), transparent 70%);
+  background: color-mix(in srgb, var(--surface-color), transparent 50%);
+}
+
+/* GitHub-style activity levels */
+.calendar-day.today {
+  border: 2px solid var(--accent-color);
+  border-radius: 4px;
+}
+
+/* Learning activity levels (GitHub-style) */
+.calendar-day.learned {
+  color: white;
+  border-color: transparent;
+}
+
+.calendar-day.learned.level-1 {
+  background: #0e4429; /* Darkest green */
+}
+
+.calendar-day.learned.level-2 {
+  background: #006d32; /* Dark green */
+}
+
+.calendar-day.learned.level-3 {
+  background: #26a641; /* Medium green */
+}
+
+.calendar-day.learned.level-4 {
+  background: #39d353; /* Light green */
+}
+
+/* Default learned state (level-1) */
+.calendar-day.learned:not(.level-1):not(.level-2):not(.level-3):not(.level-4) {
+  background: #0e4429;
+}
+
+/* Today + learned combination */
+.calendar-day.learned.today {
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* Legend Styles */
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+  transform: translateX(5px);
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 85%);
+}
+
+.legend-dot.today {
+  background: var(--surface-color, #f6f8fa);
+  border: 2px solid var(--accent-color);
+  width: 10px;
+  height: 10px;
+}
+
+.legend-dot.normal {
+  background: var(--surface-color, #f6f8fa);
+}
+
+.legend-dot.level-1 {
+  background: #0e4429;
+  border-color: transparent;
+}
+
+.legend-dot.level-2 {
+  background: #006d32;
+  border-color: transparent;
+}
+
+.legend-dot.level-3 {
+  background: #26a641;
+  border-color: transparent;
+}
+
+.legend-dot.level-4 {
+  background: #39d353;
+  border-color: transparent;
+}
+
+.legend-dot.future {
+  background: color-mix(in srgb, var(--default-color), transparent 95%);
+  border-color: color-mix(in srgb, var(--default-color), transparent 90%);
+}
+
+/* Tips List */
+.tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tips-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  font-size: 14px;
+  color: var(--default-color);
+  transition: all 0.2s ease;
+}
+
+.tips-list li:last-child {
+  border-bottom: none;
+}
+
+.tips-list li::before {
+  content: '💡';
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.tips-list li:hover {
+  background: color-mix(in srgb, var(--accent-color), transparent 95%);
+  padding-left: 10px;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Calendar controls hover effects */
+.calendar-controls button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design for Calendar */
+@media (max-width: 768px) {
+  .calendar-widget {
+    padding: 12px;
+  }
+  
+  .calendar-day {
+    min-height: 40px;
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .weekday {
+    padding: 8px 0;
+    font-size: 12px;
+  }
+  
+  .calendar-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .legend-items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .legend-item {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .tips-list li {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-day {
+    min-height: 35px;
+    padding: 6px;
+    font-size: 11px;
+  }
+  
+  .calendar-day.learned::after {
+    width: 12px;
+    height: 12px;
+    font-size: 8px;
+    top: 2px;
+    right: 2px;
+  }
+}

@@ -1,0 +1,116 @@
+/* Auth pages (register/login) */
+
+:root {
+  --auth-bg: color-mix(in srgb, var(--accent-color), transparent 96%);
+}
+
+body.auth-page {
+  background: radial-gradient(ellipse at center, var(--auth-bg) 0%, var(--background-color) 70%);
+}
+
+.auth-main {
+  padding: 60px 0;
+}
+
+.auth-back {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: white;
+  text-decoration: none;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-color), transparent 60%);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.auth-back i {
+  font-size: 18px;
+}
+
+.auth-back span {
+  display: none;
+}
+
+.auth-back:hover {
+  color: white;
+  background: color-mix(in srgb, var(--accent-color), black 10%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-color), transparent 50%);
+}
+
+.auth-card {
+  background: var(--surface-color);
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--default-color), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--accent-color), transparent 85%);
+}
+
+.auth-logo {
+  text-decoration: none;
+}
+
+.auth-logo img {
+  margin-bottom: 8px !important;
+}
+
+.auth-logo .sitename {
+  font-family: "Great Vibes", cursive;
+  font-size: 40px;
+  color: var(--heading-color);
+}
+
+.modern-form .form-group {
+  margin-bottom: 16px;
+}
+
+.modern-form .form-control {
+  padding: 14px 16px;
+  border: 2px solid color-mix(in srgb, var(--default-color), transparent 85%);
+  border-radius: 10px;
+  background: var(--surface-color);
+  color: var(--default-color);
+}
+
+.modern-form .form-control:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color), transparent 90%);
+}
+
+.submit-btn {
+  background: var(--accent-color);
+  color: var(--contrast-color);
+  border: none;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.submit-btn:hover {
+  background: color-mix(in srgb, var(--accent-color), black 10%);
+}
+
+.auth-footer a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+

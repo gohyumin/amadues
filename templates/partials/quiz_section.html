@@ -1,0 +1,241 @@
+<!-- Quiz Section -->
+<div class="quiz-container">
+  <!-- Quiz Selection View -->
+  <div class="quiz-selection" id="quizSelection">
+    
+    <!-- Quiz Grid -->
+    <div class="quiz-grid" id="quizGrid">
+      <!-- Basic Greetings Quiz -->
+      <div class="quiz-card color-blue" data-quiz="basic">
+        <div class="quiz-content">
+          <div class="quiz-icon">
+            <i class="bi bi-chat-dots"></i>
+          </div>
+          <div class="quiz-info">
+            <h4 class="quiz-title">Basic Greetings Quiz</h4>
+            <p class="quiz-description">Fill in the blanks with greeting expressions</p>
+            <div class="quiz-stats">
+              <span class="quiz-stat">
+                <i class="bi bi-question-circle"></i>
+                <span>5 Questions</span>
+              </span>
+              <span class="quiz-stat">
+                <i class="bi bi-clock"></i>
+                <span>3 min</span>
+              </span>
+            </div>
+            <div class="quiz-badge">Start Quiz</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ordering Food Quiz -->
+      <div class="quiz-card color-green" data-quiz="ordering">
+        <div class="quiz-content">
+          <div class="quiz-icon">
+            <i class="bi bi-cup-hot"></i>
+          </div>
+          <div class="quiz-info">
+            <h4 class="quiz-title">Ordering Food Quiz</h4>
+            <p class="quiz-description">Complete restaurant conversation blanks</p>
+            <div class="quiz-stats">
+              <span class="quiz-stat">
+                <i class="bi bi-question-circle"></i>
+                <span>5 Questions</span>
+              </span>
+              <span class="quiz-stat">
+                <i class="bi bi-clock"></i>
+                <span>4 min</span>
+              </span>
+            </div>
+            <div class="quiz-badge">Start Quiz</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asking Directions Quiz -->
+      <div class="quiz-card color-orange" data-quiz="directions">
+        <div class="quiz-content">
+          <div class="quiz-icon">
+            <i class="bi bi-signpost-2"></i>
+          </div>
+          <div class="quiz-info">
+            <h4 class="quiz-title">Asking Directions Quiz</h4>
+            <p class="quiz-description">Fill in direction-related vocabulary</p>
+            <div class="quiz-stats">
+              <span class="quiz-stat">
+                <i class="bi bi-question-circle"></i>
+                <span>5 Questions</span>
+              </span>
+              <span class="quiz-stat">
+                <i class="bi bi-clock"></i>
+                <span>3 min</span>
+              </span>
+            </div>
+            <div class="quiz-badge">Start Quiz</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Practice View -->
+  <div class="quiz-practice d-none" id="quizPractice">
+    <!-- Quiz Header -->
+    <div class="quiz-practice-header">
+      <button class="btn btn-outline-secondary quiz-back-btn" id="backToQuizSelection">
+        <i class="bi bi-arrow-left"></i> Back to Quizzes
+      </button>
+    </div>
+
+    <!-- Quiz Progress -->
+    <div class="quiz-progress-section">
+      <div class="quiz-progress-info">
+        <span class="current-question">Question <span id="currentQuestionNum">1</span> of <span id="totalQuestions">5</span></span>
+        <span class="quiz-timer">
+          <i class="bi bi-clock"></i>
+          <span id="quizTimer">3:00</span>
+        </span>
+      </div>
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="quizProgressFill"></div>
+      </div>
+    </div>
+
+    <!-- Question Area -->
+    <div class="question-area" id="questionArea">
+      <div class="question-card">
+        <div class="question-header">
+          <h3 id="quizTitleHeader">Basic Greetings Quiz</h3>
+          <h4 id="questionHeaderTitle">Fill in the blank with the correct greeting:</h4>
+        </div>
+        
+        <div class="question-content">
+          <div class="question-text" id="questionText">
+            <!-- Question will be displayed here -->
+            <p>Fill in the blank: 你___, how are you?</p>
+          </div>
+          
+          <div class="question-translation" id="questionTranslation">
+            <!-- Translation will be displayed here -->
+            <p><em>Translation: Hello, how are you?</em></p>
+          </div>
+        </div>
+
+        <div class="answer-options" id="answerOptions">
+          <!-- Answer options will be generated here -->
+          <div class="answer-option" data-answer="好">
+            <input type="radio" name="quiz-answer" id="option-1" value="好">
+            <label for="option-1">好</label>
+          </div>
+          <div class="answer-option" data-answer="早">
+            <input type="radio" name="quiz-answer" id="option-2" value="早">
+            <label for="option-2">早</label>
+          </div>
+          <div class="answer-option" data-answer="再见">
+            <input type="radio" name="quiz-answer" id="option-3" value="再见">
+            <label for="option-3">再见</label>
+          </div>
+        </div>
+
+        <div class="question-actions">
+          <button class="btn btn-primary btn-lg" id="submitAnswer" disabled>
+            Submit Answer
+          </button>
+        </div>
+
+        <!-- Answer Feedback -->
+        <div class="answer-feedback d-none" id="answerFeedback">
+          <div class="feedback-content">
+            <div class="feedback-icon">
+              <i class="bi bi-check-circle-fill text-success"></i>
+            </div>
+            <div class="feedback-text">
+              <h5>Correct!</h5>
+              <p>好 (hǎo) means "good" and is used in greetings.</p>
+            </div>
+          </div>
+          <button class="btn btn-primary quiz-next-btn" id="nextQuestion">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Results View -->
+  <div class="quiz-results d-none" id="quizResults">
+    <div class="results-content">
+      <div class="results-header">
+        <div class="results-icon">
+          <i class="bi bi-trophy-fill"></i>
+        </div>
+        <h3>Quiz Complete!</h3>
+        <p id="resultsMessage">Great job on completing the quiz!</p>
+      </div>
+
+      <div class="results-stats">
+        <div class="result-stat">
+          <div class="stat-value" id="correctAnswers">4</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="result-stat">
+          <div class="stat-value" id="totalQuestionsResult">5</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="result-stat">
+          <div class="stat-value" id="accuracyPercentage">80%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+        <div class="result-stat">
+          <div class="stat-value" id="timeSpent">2:34</div>
+          <div class="stat-label">Time</div>
+        </div>
+      </div>
+
+      <div class="results-breakdown" id="resultsBreakdown">
+        <!-- Individual question results will be displayed here -->
+        <div class="breakdown-header">
+          <h4>Question Breakdown</h4>
+        </div>
+        <div class="breakdown-list" id="breakdownList">
+          <!-- Results for each question -->
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn btn-outline-primary" id="retryQuiz">
+          <i class="bi bi-arrow-clockwise"></i> Retry Quiz
+        </button>
+        <button class="btn btn-primary" id="chooseNewQuiz">
+          <i class="bi bi-grid-3x3-gap"></i> Choose New Quiz
+        </button>
+        <button class="btn btn-success" id="reviewAnswers">
+          <i class="bi bi-eye"></i> Review Answers
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Review View -->
+  <div class="quiz-review d-none" id="quizReview">
+    <div class="review-content">
+      <div class="review-header">
+        <div class="review-title">
+          <h3 id="reviewQuizTitle">Review: Basic Greetings Quiz</h3>
+          <p>Review your answers and learn from mistakes</p>
+        </div>
+      </div>
+
+      <div class="review-questions" id="reviewQuestions">
+        <!-- Review questions will be generated here -->
+      </div>
+
+      <div class="review-navigation">
+        <button class="btn btn-outline-primary" id="backToResultsBottom">
+          <i class="bi bi-arrow-left"></i> Back to Results
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

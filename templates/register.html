@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Register - Amadeus</title>
+  <meta name="description" content="Create your Amadeus account to start a personalized AI learning plan.">
+  <meta name="keywords" content="AI learning, register, signup, Amadeus">
+
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/aos/aos.css') }}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/auth.css') }}" rel="stylesheet">
+</head>
+
+<body class="auth-page light-background">
+
+  <main class="auth-main">
+    <a href="{{ url_for('home') }}" class="auth-back"><i class="bi bi-arrow-left"></i><span>Back</span></a>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="100">
+          <div class="auth-card">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="mb-3">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category=='danger' else category }}" role="alert" style="margin-bottom:10px;">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            <a href="{{ url_for('home') }}" class="auth-logo d-flex flex-column align-items-center justify-content-center mb-3">
+              <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="Amadeus Logo" class="mb-3" style="height:60px;width:auto;">
+              <span class="sitename">Amadeus</span>
+            </a>
+
+            <ul class="nav nav-pills justify-content-center mb-4" id="auth-tabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link {% if active_tab != 'login' %}active{% endif %}" id="register-tab" data-bs-toggle="pill" data-bs-target="#register-pane" type="button" role="tab">Register</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link {% if active_tab == 'login' %}active{% endif %}" id="login-tab" data-bs-toggle="pill" data-bs-target="#login-pane" type="button" role="tab">Login</button>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="auth-tabs-content">
+              <!-- Register Pane -->
+              <div class="tab-pane fade {% if active_tab != 'login' %}show active{% endif %}" id="register-pane" role="tabpanel" aria-labelledby="register-tab">
+                <form action="{{ url_for('register') }}" method="post" class="modern-form" id="registerForm">
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="username" placeholder="Username" maxlength="50" pattern="\S{1,50}" title="No spaces. Up to 50 characters." required>
+                  </div>
+                  <div class="form-group">
+                    <input type="email" class="form-control" name="email" placeholder="Email" pattern=".*@.*" title="Must contain @" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="password" class="form-control" name="confirm_password" placeholder="Confirm Password" required>
+                  </div>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="1" id="acceptTerms" required>
+                    <label class="form-check-label" for="acceptTerms">I agree to the Terms & Privacy</label>
+                  </div>
+                  <button type="submit" class="submit-btn w-100">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-icon"><i class="bi bi-person-plus"></i></span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Login Pane -->
+              <div class="tab-pane fade {% if active_tab == 'login' %}show active{% endif %}" id="login-pane" role="tabpanel" aria-labelledby="login-tab">
+                <form action="{{ url_for('login') }}" method="post" class="modern-form" id="loginForm">
+                  <div class="form-group">
+                    <input type="email" class="form-control" name="email" placeholder="Email" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="1" id="rememberMe" name="remember">
+                      <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="#" class="small" style="color: var(--accent-color);">Forgot password?</a>
+                  </div>
+                  <button type="submit" class="submit-btn w-100">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-icon"><i class="bi bi-arrow-right"></i></span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div class="auth-footer text-center mt-3">
+              <small>By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/vendor/aos/aos.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/register.js') }}"></script>
+  
+  <script>
+  // 处理登录成功后的自动重定向
+  document.addEventListener('DOMContentLoaded', function() {
+    // 检查URL参数以确定是否需要重定向
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get('redirect_to');
+    
+    // 检查是否有成功消息且有重定向目标
+    const successAlert = document.querySelector('.alert-success');
+    if (successAlert && redirectTo && successAlert.textContent.includes('Registration successful')) {
+      // 显示重定向消息
+      setTimeout(function() {
+        // 创建重定向消息元素
+        const redirectMsg = document.createElement('div');
+        redirectMsg.className = 'alert alert-info text-center';
+        redirectMsg.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Redirecting...';
+        redirectMsg.style.marginTop = '10px';
+        
+        // 添加到成功消息下方
+        successAlert.parentNode.insertBefore(redirectMsg, successAlert.nextSibling);
+        
+        // 2秒后执行重定向
+        setTimeout(function() {
+          if (redirectTo === 'dashboard') {
+            window.location.href = '{{ url_for("dashboard") }}';
+          } else if (redirectTo === 'onboarding') {
+            window.location.href = '{{ url_for("onboarding") }}';
+          }
+        }, 2000);
+      }, 1000); // 1秒后显示"Redirecting..."
+    }
+  });
+  </script>
+</body>
+
+</html>

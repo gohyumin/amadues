@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Onboarding - Amadeus</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/auth.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/onboarding.css') }}" rel="stylesheet">
+</head>
+
+<body class="light-background">
+  <main class="auth-main onboarding-main">
+    <div id="welcome" class="welcome-fullscreen">
+      <h1 class="welcome-text typewriter"><span class="script">Welcome, </span><span class="script" id="welcomeName">{{ username }}...</span></h1>
+    </div>
+
+    <div id="tagline" class="tagline d-none">Before we start learning, answer the questions.</div>
+
+    <div id="onbContainer" class="container d-none">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="onb-card">
+            <div class="onb-visual">
+              <video id="onbVideo" autoplay muted loop
+                     src="{{ url_for('static', filename='assets/img/videos/step1.mp4') }}"
+                     data-step1="{{ url_for('static', filename='assets/img/videos/step1.mp4') }}"
+                     data-step2="{{ url_for('static', filename='assets/img/videos/step2.mp4') }}"
+                     data-step3="{{ url_for('static', filename='assets/img/videos/step3.mp4') }}"
+                     data-step4="{{ url_for('static', filename='assets/img/videos/step4.mp4') }}"
+                     data-step5="{{ url_for('static', filename='assets/img/videos/step4.mp4') }}"
+                     data-step6="{{ url_for('static', filename='assets/img/videos/step5.mp4') }}"
+                     class="onb-img">
+              </video>
+            </div>
+            <div id="wizard" class="wizard d-none">
+              <div class="progress-dots" id="progressDots">
+                <div class="dot active" data-step="1"></div>
+                <div class="dot" data-step="2"></div>
+                <div class="dot" data-step="3"></div>
+                <div class="dot" data-step="4"></div>
+                <div class="dot" data-step="5"></div>
+                <div class="dot" data-step="6"></div>
+              </div>
+
+              <form id="onbForm" class="modern-form">
+                <div class="panel" data-step="1">
+                  <label class="form-label">How old are you?</label>
+                  <input type="number" class="form-control" name="age" min="5" max="120" required>
+                </div>
+
+                <div class="panel d-none" data-step="2">
+                  <label class="form-label">Which country are you from?</label>
+                  <div class="selection-grid country-grid" data-type="country">
+                    <div class="selection-item" data-value="malaysia">
+                      <img src="{{ url_for('static', filename='assets/img/countries/malaysia.png') }}" alt="Malaysia">
+                      <span class="selection-label">Malaysia</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="china">
+                      <img src="{{ url_for('static', filename='assets/img/countries/china.png') }}" alt="China">
+                      <span class="selection-label">China</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="japan">
+                      <img src="{{ url_for('static', filename='assets/img/countries/japan.png') }}" alt="Japan">
+                      <span class="selection-label">Japan</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="korea">
+                      <img src="{{ url_for('static', filename='assets/img/countries/korea.png') }}" alt="Korea">
+                      <span class="selection-label">Korea</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="singapore">
+                      <img src="{{ url_for('static', filename='assets/img/countries/singapore.png') }}" alt="Singapore">
+                      <span class="selection-label">Singapore</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="country" required>
+                </div>
+
+                <div class="panel d-none" data-step="3">
+                  <label class="form-label">What are your interests? (Choose up to 2)</label>
+                  <div class="selection-grid interests-grid" data-type="interests" data-max-selections="2">
+                    <div class="selection-item" data-value="technology">
+                      <img src="{{ url_for('static', filename='assets/img/interests/technology.png') }}" alt="Technology">
+                      <span class="selection-label">Technology</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="arts">
+                      <img src="{{ url_for('static', filename='assets/img/interests/arts.png') }}" alt="Arts">
+                      <span class="selection-label">Arts</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="music">
+                      <img src="{{ url_for('static', filename='assets/img/interests/music.png') }}" alt="Music">
+                      <span class="selection-label">Music</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="sports">
+                      <img src="{{ url_for('static', filename='assets/img/interests/sports.png') }}" alt="Sports">
+                      <span class="selection-label">Sports</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="gaming">
+                      <img src="{{ url_for('static', filename='assets/img/interests/gaming.png') }}" alt="Gaming">
+                      <span class="selection-label">Gaming</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="cooking">
+                      <img src="{{ url_for('static', filename='assets/img/interests/cooking.png') }}" alt="Cooking">
+                      <span class="selection-label">Cooking</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="travel">
+                      <img src="{{ url_for('static', filename='assets/img/interests/travel.png') }}" alt="Travel">
+                      <span class="selection-label">Travel</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="reading">
+                      <img src="{{ url_for('static', filename='assets/img/interests/reading.png') }}" alt="Reading">
+                      <span class="selection-label">Reading</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="fashion">
+                      <img src="{{ url_for('static', filename='assets/img/interests/fashion.png') }}" alt="Fashion">
+                      <span class="selection-label">Fashion</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="fitness">
+                      <img src="{{ url_for('static', filename='assets/img/interests/photography.png') }}" alt="Fitness">
+                      <span class="selection-label">Photography</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="interests" required>
+                </div>
+
+                <div class="panel d-none" data-step="4">
+                  <label class="form-label">What is your native language?</label>
+                  <div class="selection-grid language-grid" data-type="native_language">
+                    <div class="selection-item" data-value="english">
+                      <img src="{{ url_for('static', filename='assets/img/languages/english.png') }}" alt="English">
+                      <span class="selection-label">English</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="chinese">
+                      <img src="{{ url_for('static', filename='assets/img/languages/chinese.png') }}" alt="Chinese">
+                      <span class="selection-label">Chinese</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="malay">
+                      <img src="{{ url_for('static', filename='assets/img/languages/malay.png') }}" alt="Malay">
+                      <span class="selection-label">Bahasa Melayu</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="japanese">
+                      <img src="{{ url_for('static', filename='assets/img/languages/japanese.png') }}" alt="Japanese">
+                      <span class="selection-label">Japanese</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="korean">
+                      <img src="{{ url_for('static', filename='assets/img/languages/korean.png') }}" alt="Korean">
+                      <span class="selection-label">Korean</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="native_language" required>
+                </div>
+
+                <div class="panel d-none" data-step="5">
+                  <label class="form-label">Which language do you want to learn?</label>
+                  <div class="selection-grid language-grid" data-type="language">
+                    <div class="selection-item" data-value="english">
+                      <img src="{{ url_for('static', filename='assets/img/languages/english.png') }}" alt="English">
+                      <span class="selection-label">English</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="chinese">
+                      <img src="{{ url_for('static', filename='assets/img/languages/chinese.png') }}" alt="Chinese">
+                      <span class="selection-label">Chinese</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="malay">
+                      <img src="{{ url_for('static', filename='assets/img/languages/malay.png') }}" alt="Malay">
+                      <span class="selection-label">Bahasa Melayu</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="japanese">
+                      <img src="{{ url_for('static', filename='assets/img/languages/japanese.png') }}" alt="Japanese">
+                      <span class="selection-label">Japanese</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="korean">
+                      <img src="{{ url_for('static', filename='assets/img/languages/korean.png') }}" alt="Korean">
+                      <span class="selection-label">Korean</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="target_language" required>
+                </div>
+
+                <div class="panel d-none" data-step="6">
+                  <label class="form-label">Your current level</label>
+                  <div class="selection-grid level-grid" data-type="level">
+                    <div class="selection-item" data-value="beginner">
+                      <img src="{{ url_for('static', filename='assets/img/levels/beginner.png') }}" alt="Beginner">
+                      <span class="selection-label">Beginner</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="intermediate">
+                      <img src="{{ url_for('static', filename='assets/img/levels/intermediate.png') }}" alt="Intermediate">
+                      <span class="selection-label">Intermediate</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                    <div class="selection-item" data-value="advanced">
+                      <img src="{{ url_for('static', filename='assets/img/levels/advanced.png') }}" alt="Advanced">
+                      <span class="selection-label">Advanced</span>
+                      <div class="selection-overlay">
+                        <i class="bi bi-check-lg"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="level" required>
+                </div>
+
+                <div class="wizard-actions d-flex justify-content-between mt-4">
+                  <button type="button" id="prevBtn" class="btn btn-outline-secondary" disabled>Back</button>
+                  <button type="button" id="nextBtn" class="btn btn-primary">Next</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/onboarding.js') }}"></script>
+</body>
+
+</html>
+
+

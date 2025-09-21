@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Dashboard - Amadeus</title>
+
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/auth.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/dashboard.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  
+  <!-- Preload module CSS to avoid loading delays -->
+  <link href="{{ url_for('static', filename='assets/css/chatbot.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/calendar.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/exercise.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/quiz.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/webcam.css') }}" rel="stylesheet">
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+
+<body class="light-background">
+  <header id="dashTopbar" class="dash-topbar d-none">
+    <div class="topbar-inner">
+      <div class="brand-left d-flex align-items-center">
+        <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="Logo" class="brand-logo-sm">
+        <div class="brand-text">Amadeus</div>
+      </div>
+      <div class="topbar-center">
+        <div class="searchbar">
+          <i class="bi bi-search"></i>
+          <input id="dashSearch" type="text" placeholder="Search" />
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle theme"><i class="bi bi-sun"></i></button>
+        <div class="avatar" title="{{ username|default('User') }}">{{ (username or 'U')[:1]|upper }}</div>
+      </div>
+    </div>
+  </header>
+  <main class="auth-main">
+    <div id="dashWelcome" class="dash-welcome">
+      <h1 class="typewriter"><span class="script">Welcome back, </span><span class="script">{{ username }}~</span></h1>
+    </div>
+    <div id="dashContent" class="dash-layout d-none">
+      <aside class="dash-sidebar">
+        <nav class="menu" id="dashMenu">
+          <button class="menu-item active" data-target="course">
+            <i class="bi bi-house-door"></i>Dashboard
+          </button>
+          <button class="menu-item" data-target="chatbot">
+            <i class="bi bi-chat-dots"></i>AI Chatbot
+          </button>
+          <button class="menu-item" data-target="exercises">
+            <i class="bi bi-pencil-square"></i>Exercises
+          </button>
+          <button class="menu-item" data-target="quiz">
+            <i class="bi bi-question-circle"></i>Quiz
+          </button>
+          <button class="menu-item" data-target="calendar">
+            <i class="bi bi-calendar3"></i>Calendar
+          </button>
+          <button class="menu-item" data-target="webcam">
+            <i class="bi bi-camera-video"></i>Webcam
+          </button>
+          <button class="menu-item" data-target="settings">
+            <i class="bi bi-gear"></i>Settings
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <form id="logoutForm" action="{{ url_for('logout') }}" method="post">
+            <button type="button" id="logoutBtn">
+              <i class="bi bi-box-arrow-left"></i>Logout
+            </button>
+          </form>
+        </div>
+      </aside>
+      <section class="dash-main">
+        <div id="panel-course" class="panel active">
+          <div class="panel-container dashboard-section">
+            <div class="dash-hero">
+              <h1>Dashboard</h1>
+              <p>Your learning overview at a glance.</p>
+            </div>
+            
+            <!-- Statistics Overview -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div class="stat-content">
+                  <h3 id="totalDaysLearned">0</h3>
+                  <p>Total days you learned</p>
+                  <small class="text-success">Keep learning!</small>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-fire"></i>
+                </div>
+                <div class="stat-content">
+                  <h3 id="streakDays">0</h3>
+                  <p>Days Streak</p>
+                  <small class="text-warning">🔥 Keep it up!</small>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-calendar3"></i>
+                </div>
+                <div class="stat-content">
+                  <h3 id="monthDays">0</h3>
+                  <p>This Month</p>
+                  <small class="text-info">Learning days</small>
+                </div>
+              </div>
+              <div class="stat-card" id="checkinCard">
+                <div class="stat-icon">
+                  <i class="bi bi-plus-circle-fill"></i>
+                </div>
+                <div class="stat-content">
+                  <h3>Today's Check-in</h3>
+                  <p id="checkinStatus">Not checked in</p>
+                  <button id="checkinBtn" class="btn btn-primary btn-sm" onclick="dailyCheckin()">Check In Now</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h5>Weekly Progress</h5>
+                  <p>Your study activities this week</p>
+                </div>
+                <div class="chart-container">
+                  <canvas id="weeklyProgressChart"></canvas>
+                </div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h5>Language Distribution</h5>
+                  <p>Time spent on each language</p>
+                </div>
+                <div class="chart-container">
+                  <canvas id="languageDistributionChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Cards -->
+            <div class="dash-grid">
+              <div class="dash-card progress-card">
+                <div class="card-header">
+                  <h5>Today's Goal</h5>
+                  <span class="badge bg-primary">70%</span>
+                </div>
+                <p>Complete 1 lesson and 1 quiz</p>
+                <div class="progress-wrapper">
+                  <div class="progress" role="progressbar" aria-label="Daily progress" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar bg-gradient" style="width: 70%"></div>
+                  </div>
+                  <small class="progress-text">7/10 tasks completed</small>
+                </div>
+              </div>
+              <div class="dash-card progress-card">
+                <div class="card-header">
+                  <h5>Weekly Challenge</h5>
+                  <span class="badge bg-success">43%</span>
+                </div>
+                <p>Study 5 hours this week</p>
+                <div class="progress-wrapper">
+                  <div class="progress" role="progressbar" aria-label="Weekly progress" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar bg-success bg-gradient" style="width: 43%"></div>
+                  </div>
+                  <small class="progress-text">2.15h / 5h completed</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-section">
+              <h5>Recent Activity</h5>
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div class="activity-icon bg-primary">
+                    <i class="bi bi-book"></i>
+                  </div>
+                  <div class="activity-content">
+                    <p><strong>Completed lesson:</strong> Basic Greetings</p>
+                    <small class="text-muted">2 hours ago</small>
+                  </div>
+                  <div class="activity-points">+15 XP</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon bg-success">
+                    <i class="bi bi-check-circle"></i>
+                  </div>
+                  <div class="activity-content">
+                    <p><strong>Quiz passed:</strong> Vocabulary Test #3</p>
+                    <small class="text-muted">1 day ago</small>
+                  </div>
+                  <div class="activity-points">+25 XP</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon bg-warning">
+                    <i class="bi bi-star"></i>
+                  </div>
+                  <div class="activity-content">
+                    <p><strong>Achievement unlocked:</strong> 7-day streak</p>
+                    <small class="text-muted">2 days ago</small>
+                  </div>
+                  <div class="activity-points">+50 XP</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="panel-chatbot" class="panel">
+          <div class="panel-container">
+            <div class="dash-hero"><h1>AI Chatbot</h1><p>Ask questions and practice conversations.</p></div>
+            {% include 'partials/chatbot_section.html' %}
+          </div>
+        </div>
+        <div id="panel-exercises" class="panel">
+          <div class="panel-container">
+            <div class="dash-hero"><h1>Exercises</h1><p>Practice makes perfect.</p></div>
+            
+            {% include 'partials/exercise_section.html' %}
+          </div>
+        </div>
+        <div id="panel-quiz" class="panel">
+          <div class="panel-container">
+            <div class="dash-hero"><h1>Quiz</h1><p>Test your knowledge with scenario-based quizzes</p></div>
+            
+            {% include 'partials/quiz_section.html' %}
+          </div>
+        </div>
+        <div id="panel-calendar" class="panel">
+          <div class="panel-container">
+            <div class="dash-hero">
+              <h1>Learning Calendar</h1>
+              <p>Track your daily learning progress and build streaks.</p>
+            </div>
+            
+            {% include 'partials/calendar_section.html' %}
+          </div>
+        </div>
+        <div id="panel-webcam" class="panel">
+          <div class="panel-container">
+            <div class="dash-hero">
+              <h1>Webcam Vocabulary Discovery</h1>
+              <p>Use your camera to discover and learn new vocabulary from objects around you in real life.</p>
+            </div>
+            
+            {% include 'partials/webcam_section.html' %}
+          </div>
+        </div>
+        <div id="panel-settings" class="panel">
+          <div class="panel-container dashboard-section">
+            <div class="dash-hero"><h1>Settings</h1><p>Manage your profile and preferences.</p></div>
+            <div class="dash-card"><p>Settings coming soon.</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/recorder.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/chatbot.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/exercise.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/quiz.js') }}"></script>
+  
+  <!-- Preload module JavaScript to avoid loading delays -->
+</body>
+
+</html>
+
+
